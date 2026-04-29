@@ -1,54 +1,70 @@
 import os
+import logging
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
+
 import discord
 from discord.ext import commands
-import genshin
-import logging
 
-# Server
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
+
+TOKEN = os.getenv("DISCORD_BOT_TOKEN")
+GUILD_ID = os.getenv("DISCORD_GUILD_ID")
+
+EXTENSIONS = [
+    "cogs.genshin.commands.genshin_commands",
+    "cogs.genshin.tasks.genshin_tasks",
+    "cogs.hsr.commands.hsr_commands",
+    "cogs.hsr.tasks.hsr_tasks",
+]
+
+
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
         self.wfile.write(b"Bot is running!")
 
+    def log_message(self, format, *args):
+        pass
+
+
 def run_health_check_server():
-    server = HTTPServer(('0.0.0.0', 8000), HealthCheckHandler)
+    server = HTTPServer(("0.0.0.0", 8000), HealthCheckHandler)
     server.serve_forever()
 
-# Activate health check server
+
+class AtamaWaruiBot(commands.Bot):
+    def __init__(self):
+        intents = discord.Intents.default()
+        super().__init__(command_prefix=commands.when_mentioned, intents=intents)
+
+    async def setup_hook(self):
+        for ext in EXTENSIONS:
+            await self.load_extension(ext)
+            logging.info(f"Loaded: {ext}")
+
+        if GUILD_ID:
+            guild = discord.Object(id=int(GUILD_ID))
+            self.tree.copy_global_to(guild=guild)
+            await self.tree.sync(guild=guild)
+            logging.info(f"Slash commands synced to guild {GUILD_ID}")
+        else:
+            await self.tree.sync()
+            logging.info("Slash commands synced globally")
+
+    async def on_ready(self):
+        logging.info(f"Logged in as {self.user} (ID: {self.user.id})")
+
+
 threading.Thread(target=run_health_check_server, daemon=True).start()
 
-# Configurations
-TOKEN = os.getenv("DISCORD_BOT_TOKEN")
-LTUID = os.getenv("HOYOLAB_LTUID")
-LTOKEN = os.getenv("HOYOLAB_LTOKEN")
+bot = AtamaWaruiBot()
 
-intents = discord.Intents.default()
-intents.message_content = True
-bot = commands.Bot(command_prefix="!", intents=intents)
-
-# Check
-@bot.event
-async def on_ready():
-    logging.info(f"Logged in as {bot.user}")
-
-# Jushi Command
-@bot.command()
-async def jushi(ctx):
-    cookies = {"ltuid_v2": LTUID, "ltoken_v2": LTOKEN}
-    client = genshin.Client(cookies)
-    
-    try:
-        # UID
-        notes = await client.get_genshin_notes(856548893)
-        await ctx.send(f"現在の天然樹脂: **{notes.current_resin}/{notes.max_resin}**")
-    except Exception as e:
-        await ctx.send(f"エラーが発生しました: {e}")
-
-# Activate Bot
 if TOKEN:
     bot.run(TOKEN)
 else:
-    logging.info("TOKENが設定されていません。")
+    logging.error("DISCORD_BOT_TOKEN が設定されていません。")
