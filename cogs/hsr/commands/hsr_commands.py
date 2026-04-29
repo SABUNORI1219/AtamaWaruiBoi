@@ -73,6 +73,11 @@ class HSRCommands(commands.Cog):
         else:
             embed.set_author(name=author_name)
 
+        icon_file = None
+        if os.path.exists("assets/hsr/hsr-icon.png"):
+            icon_file = discord.File("assets/hsr/hsr-icon.png", filename="hsr-icon.png")
+            embed.set_thumbnail(url="attachment://hsr-icon.png")
+
         # 開拓力
         stamina_full = notes.current_stamina >= notes.max_stamina
         stamina_val = (
@@ -83,7 +88,7 @@ class HSRCommands(commands.Cog):
         reserve = getattr(notes, "current_reserve_stamina", None)
         reserve_line = f"\n予備開拓力: `{reserve}`" if reserve is not None else ""
         embed.add_field(
-            name="⚡ 開拓力",
+            name=f"{self.bot.custom_emojis.get('hsr_kaitakuryoku', '⚡')} 開拓力",
             value=f"`{notes.current_stamina} / {notes.max_stamina}`\n{stamina_val}{reserve_line}",
             inline=True,
         )
@@ -104,8 +109,7 @@ class HSRCommands(commands.Cog):
                 exp_val = f"`{accepted} / {total_exp}` 派遣中\n" + exp_val
         else:
             exp_val = "派遣なし"
-        embed.add_field(name="🗺️ 依頼（探索）", value=exp_val, inline=False)
-
+        embed.add_field(name=f"{self.bot.custom_emojis.get('hsr_irai_haken', '🗺️')} 依頼（探索）", value=exp_val, inline=False)
         embed.add_field(name="​", value="​", inline=False)
 
         # デイリー訓練
@@ -118,7 +122,7 @@ class HSRCommands(commands.Cog):
                 train_val = f"⏳ `{train_cur} / {train_max}`"
         else:
             train_val = "取得不可"
-        embed.add_field(name="📋 デイリー訓練", value=train_val, inline=True)
+        embed.add_field(name=f"{self.bot.custom_emojis.get('hsr_daily_kunren', '📋')} デイリー訓練", value=train_val, inline=True)
 
         # 模擬宇宙
         rogue_cur = getattr(notes, "current_rogue_score", None)
@@ -130,11 +134,10 @@ class HSRCommands(commands.Cog):
                 rogue_val = f"⏳ `{rogue_cur} / {rogue_max}`"
         else:
             rogue_val = "取得不可"
-        embed.add_field(name="🌌 模擬宇宙", value=rogue_val, inline=True)
+        embed.add_field(name=f"{self.bot.custom_emojis.get('hsr_mogi_utyuu', '🌌')} 模擬宇宙", value=rogue_val, inline=True)
 
         embed.add_field(name="​", value="​", inline=False)
 
-        # 歴戦余韻
         weekly_rem = getattr(notes, "remaining_weekly_discounts", None)
         weekly_max = getattr(notes, "max_weekly_discounts", None)
         if weekly_rem is not None and weekly_max is not None:
@@ -144,11 +147,13 @@ class HSRCommands(commands.Cog):
                 weekly_val = f"残り `{weekly_rem} / {weekly_max}` 回"
         else:
             weekly_val = "取得不可"
-        embed.add_field(name="⚔️ 歴戦余韻", value=weekly_val, inline=True)
+        embed.add_field(name=f"{self.bot.custom_emojis.get('hsr_rekisen_yoin', '⚔️')} 歴戦余韻", value=weekly_val, inline=True)
 
         embed.set_footer(text="最終更新")
-        await interaction.followup.send(embed=embed)
-
+        if icon_file:
+            await interaction.followup.send(embed=embed, file=icon_file)
+        else:
+            await interaction.followup.send(embed=embed)
 
 async def setup(bot: commands.Bot):
     await bot.add_cog(HSRCommands(bot))

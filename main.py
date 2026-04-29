@@ -40,9 +40,13 @@ def run_health_check_server():
 class AtamaWaruiBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
+        intents.guilds = True # ギルド情報を取得するために必要
         super().__init__(command_prefix=commands.when_mentioned, intents=intents)
+        self.custom_emojis = {} # カスタム絵文字を格納する辞書
 
     async def setup_hook(self):
+        await self._register_custom_emojis()
+
         for ext in EXTENSIONS:
             await self.load_extension(ext)
             logging.info(f"Loaded: {ext}")
@@ -55,6 +59,57 @@ class AtamaWaruiBot(commands.Bot):
         else:
             await self.tree.sync()
             logging.info("Slash commands synced globally")
+
+    async def _register_custom_emojis(self):
+        emoji_map = {
+            "genshin_jusi": "assets/genshin/jusi.png",
+            "genshin_douten_housen": "assets/genshin/douten-housen.png",
+            "genshin_daily": "assets/genshin/daily.png",
+            "genshin_sanryou_bussitu_henkaki": "assets/genshin/sanryou-bussitu-henkaki.png",
+            "genshin_tansaku_haken": "assets/genshin/tansaku-haken.png",
+            "hsr_kaitakuryoku": "assets/hsr/kaitakuryoku.png",
+            "hsr_yobi_kaitakuryoku": "assets/hsr/yobi-kaitakuryoku.png",
+            "hsr_irai_haken": "assets/hsr/irai-haken.png",
+            "hsr_daily_kunren": "assets/hsr/daily-kunren.png",
+            "hsr_mogi_utyuu": "assets/hsr/mogi-utyuu.png",
+            "hsr_rekisen_yoin": "assets/hsr/rekisen-yoin.png",
+        }
+
+        target_guild = None
+        if GUILD_ID:
+            target_guild = self.get_guild(int(GUILD_ID))
+        if not target_guild and self.guilds:
+            target_guild = self.guilds[0] # 最初のギルドをフォールバックとして使用
+        
+        if not target_guild:
+            logging.warning("カスタム絵文字をアップロードするギルドが見つかりませんでした。GUILD_IDを設定するか、Botをギルドに参加させてください。")
+            return
+
+        for name, path in emoji_map.items():
+            # 既に登録されているか確認
+            existing_emoji = discord.utils.get(self.emojis, name=name)
+            if existing_emoji:
+                self.custom_emojis[name] = str(existing_emoji)
+                logging.info(f"既存のカスタム絵文字を検出: {name} {self.custom_emojis[name]}")
+                continue
+
+            # ファイルが存在するか確認
+            if not os.path.exists(path):
+                logging.warning(f"絵文字ファイルが見つかりません: {path}")
+                continue
+
+            try:
+                with open(path, "rb") as image:
+                    emoji_bytes = image.read()
+                
+                # 絵文字をアップロード
+                new_emoji = await target_guild.create_custom_emoji(name=name, image=emoji_bytes)
+                self.custom_emojis[name] = str(new_emoji)
+                logging.info(f"カスタム絵文字を登録しました: {name} {self.custom_emojis[name]}")
+            except discord.HTTPException as e:
+                logging.error(f"カスタム絵文字 {name} の登録に失敗しました: {e} (ギルド: {target_guild.name}, ID: {target_guild.id})")
+            except Exception as e:
+                logging.error(f"カスタム絵文字 {name} の登録中に予期せぬエラーが発生しました: {e}")
 
     async def on_ready(self):
         logging.info(f"Logged in as {self.user} (ID: {self.user.id})")

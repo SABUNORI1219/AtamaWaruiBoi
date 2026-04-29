@@ -73,6 +73,11 @@ class GenshinCommands(commands.Cog):
         else:
             embed.set_author(name=author_name)
 
+        icon_file = None
+        if os.path.exists("assets/genshin/genshin-icon.png"):
+            icon_file = discord.File("assets/genshin/genshin-icon.png", filename="genshin-icon.png")
+            embed.set_thumbnail(url="attachment://genshin-icon.png")
+
         # 天然樹脂
         resin_full = notes.current_resin >= notes.max_resin
         resin_val = (
@@ -81,7 +86,7 @@ class GenshinCommands(commands.Cog):
             else f"回復まで: {fmt_td(notes.remaining_resin_recovery_time)}"
         )
         embed.add_field(
-            name="🌙 天然樹脂",
+            name=f"{self.bot.custom_emojis.get('genshin_jusi', '🌙')} 天然樹脂",
             value=f"`{notes.current_resin} / {notes.max_resin}`\n{resin_val}",
             inline=True,
         )
@@ -94,7 +99,7 @@ class GenshinCommands(commands.Cog):
             else f"回復まで: {fmt_td(notes.remaining_realm_currency_recovery_time)}"
         )
         embed.add_field(
-            name="💰 洞天宝銭",
+            name=f"{self.bot.custom_emojis.get('genshin_douten_housen', '💰')} 洞天宝銭",
             value=f"`{notes.current_realm_currency} / {notes.max_realm_currency}`\n{realm_val}",
             inline=True,
         )
@@ -109,7 +114,7 @@ class GenshinCommands(commands.Cog):
         else:
             commission_val = f"⏳ {notes.completed_commissions} / {notes.total_commissions} 完了"
         embed.add_field(
-            name="📋 デイリー任務",
+            name=f"{self.bot.custom_emojis.get('genshin_daily', '📋')} デイリー任務",
             value=commission_val,
             inline=True,
         )
@@ -123,7 +128,7 @@ class GenshinCommands(commands.Cog):
         else:
             transformer_val = f"残り: {fmt_td(t_time)}"
         embed.add_field(
-            name="⚗️ 参量物質変化器",
+            name=f"{self.bot.custom_emojis.get('genshin_sanryou_bussitu_henkaki', '⚗️')} 参量物質変化器",
             value=transformer_val,
             inline=True,
         )
@@ -141,15 +146,18 @@ class GenshinCommands(commands.Cog):
                 else:
                     lines.append(f"⏳ {char}（{fmt_td(exp.remaining_time)}）")
             embed.add_field(
-                name="🗺️ 探索派遣",
+                name=f"{self.bot.custom_emojis.get('genshin_tansaku_haken', '🗺️')} 探索派遣",
                 value="\n".join(lines),
                 inline=False,
             )
         else:
-            embed.add_field(name="🗺️ 探索派遣", value="派遣なし", inline=False)
+            embed.add_field(name=f"{self.bot.custom_emojis.get('genshin_tansaku_haken', '🗺️')} 探索派遣", value="派遣なし", inline=False)
 
         embed.set_footer(text="最終更新")
-        await interaction.followup.send(embed=embed)
+        if icon_file:
+            await interaction.followup.send(embed=embed, file=icon_file)
+        else:
+            await interaction.followup.send(embed=embed)
 
 
 async def setup(bot: commands.Bot):

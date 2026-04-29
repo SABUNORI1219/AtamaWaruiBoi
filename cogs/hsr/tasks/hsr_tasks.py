@@ -51,7 +51,7 @@ class HSRTasks(commands.Cog):
         if notes.current_stamina >= notes.max_stamina:
             if not self._stamina_notified:
                 await channel.send(
-                    f"⚡ **[スターレイル]** 開拓力が満タンになりました！"
+                    f"{self.bot.custom_emojis.get('hsr_kaitakuryoku', '⚡')} **[スターレイル]** 開拓力が満タンになりました！"
                     f" `{notes.current_stamina}/{notes.max_stamina}`"
                 )
                 self._stamina_notified = True
@@ -63,7 +63,7 @@ class HSRTasks(commands.Cog):
             all_done = all(exp.status == "Finished" for exp in notes.expeditions)
             if all_done:
                 if not self._expeditions_notified:
-                    await channel.send("🗺️ **[スターレイル]** 全ての依頼が完了しました！")
+                    await channel.send(f"{self.bot.custom_emojis.get('hsr_irai_haken', '🗺️')} **[スターレイル]** 全ての依頼が完了しました！")
                     self._expeditions_notified = True
             else:
                 self._expeditions_notified = False
