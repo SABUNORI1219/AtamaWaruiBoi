@@ -86,7 +86,7 @@ class HSRCommands(commands.Cog):
             else f"回復まで: {fmt_td(notes.stamina_recover_time)}"
         )
         reserve = getattr(notes, "current_reserve_stamina", None)
-        reserve_line = f"\n予備開拓力: `{reserve}`" if reserve is not None else ""
+        reserve_line = f"\n{self.bot.custom_emojis.get('hsr_yobi_kaitakuryoku', '📦️')} 予備開拓力: `{reserve}`" if reserve is not None else ""
         embed.add_field(
             name=f"{self.bot.custom_emojis.get('hsr_kaitakuryoku', '⚡')} 開拓力",
             value=f"`{notes.current_stamina} / {notes.max_stamina}`\n{stamina_val}{reserve_line}",
