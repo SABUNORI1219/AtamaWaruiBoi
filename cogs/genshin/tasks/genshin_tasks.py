@@ -24,10 +24,12 @@ def make_client() -> genshin.Client:
 class GenshinTasks(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self._resin_notified = False
-        self._realm_notified = False
-        self._transformer_notified = False
-        self._expeditions_notified = False
+        self.client = make_client()
+        self.last_resin = -1
+        self.last_realm_currency = -1
+        self.last_transformer_reached = False
+        self.completed_expeditions = set()
+        self.is_first_run = True
         self.check_status.start()
 
     def cog_unload(self):
@@ -43,51 +45,56 @@ class GenshinTasks(commands.Cog):
             return
 
         try:
-            client = make_client()
-            notes = await client.get_genshin_notes(GENSHIN_UID)
+            notes = await self.client.get_genshin_notes(GENSHIN_UID)
         except Exception as e:
             logger.error(f"[原神] ノート取得失敗: {e}")
             return
 
+        if self.is_first_run:
+            self.last_resin = notes.current_resin
+            self.last_realm_currency = notes.current_realm_currency
+            self.last_transformer_reached = bool(notes.transformer and notes.transformer.reached)
+            if notes.expeditions:
+                self.completed_expeditions = {
+                    (exp.character.name if hasattr(exp.character, 'name') else str(exp.character))
+                    for exp in notes.expeditions if exp.status == "Finished"
+                }
+            self.is_first_run = False
+            return
+
         # 天然樹脂が満タン
-        if notes.current_resin >= notes.max_resin:
-            if not self._resin_notified:
-                await channel.send(
-                    f"🌙 **[原神]** 天然樹脂が満タンになりました！"
-                    f" `{notes.current_resin}/{notes.max_resin}`"
-                )
-                self._resin_notified = True
-        else:
-            self._resin_notified = False
+        if notes.current_resin >= notes.max_resin and self.last_resin < notes.max_resin:
+            await channel.send(
+                f"🌙 **[原神]** 天然樹脂が満タンになりました！"
+                f" `{notes.current_resin}/{notes.max_resin}`"
+            )
+        self.last_resin = notes.current_resin
 
         # 洞天宝銭が満タン
-        if notes.current_realm_currency >= notes.max_realm_currency:
-            if not self._realm_notified:
-                await channel.send(
-                    f"💰 **[原神]** 洞天宝銭が満タンになりました！"
-                    f" `{notes.current_realm_currency}/{notes.max_realm_currency}`"
-                )
-                self._realm_notified = True
-        else:
-            self._realm_notified = False
+        if notes.current_realm_currency >= notes.max_realm_currency and self.last_realm_currency < notes.max_realm_currency:
+            await channel.send(
+                f"💰 **[原神]** 洞天宝銭が満タンになりました！"
+                f" `{notes.current_realm_currency}/{notes.max_realm_currency}`"
+            )
+        self.last_realm_currency = notes.current_realm_currency
 
         # 参量物質変化器が使用可能
-        if notes.transformer and notes.transformer.reached:
-            if not self._transformer_notified:
-                await channel.send("⚗️ **[原神]** 参量物質変化器が使用可能になりました！")
-                self._transformer_notified = True
-        else:
-            self._transformer_notified = False
+        current_transformer_reached = bool(notes.transformer and notes.transformer.reached)
+        if current_transformer_reached and not self.last_transformer_reached:
+            await channel.send("⚗️ **[原神]** 参量物質変化器が使用可能になりました！")
+        self.last_transformer_reached = current_transformer_reached
 
-        # 全探索派遣が完了
+        # 探索派遣が完了（差分を個別に通知）
         if notes.expeditions:
-            all_done = all(exp.status == "Finished" for exp in notes.expeditions)
-            if all_done:
-                if not self._expeditions_notified:
-                    await channel.send("🗺️ **[原神]** 全ての探索派遣が完了しました！")
-                    self._expeditions_notified = True
-            else:
-                self._expeditions_notified = False
+            current_completed = {
+                (exp.character.name if hasattr(exp.character, 'name') else str(exp.character))
+                for exp in notes.expeditions if exp.status == "Finished"
+            }
+            newly_completed = current_completed - self.completed_expeditions
+            if newly_completed:
+                names = ", ".join(newly_completed)
+                await channel.send(f"🗺️ **[原神]** 探索派遣が完了しました！ ({names})")
+            self.completed_expeditions = current_completed
 
     @check_status.before_loop
     async def before_check(self):

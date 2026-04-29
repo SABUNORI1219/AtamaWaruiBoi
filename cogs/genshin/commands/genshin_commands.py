@@ -61,7 +61,7 @@ class GenshinCommands(commands.Cog):
         resin_val = (
             "⚠️ **満タン！**"
             if resin_full
-            else f"回復まで: {fmt_td(notes.resin_recovery_time)}"
+            else f"回復まで: {fmt_td(notes.remaining_resin_recovery_time)}"
         )
         embed.add_field(
             name="🌙 天然樹脂",
@@ -74,7 +74,7 @@ class GenshinCommands(commands.Cog):
         realm_val = (
             "⚠️ **満タン！**"
             if realm_full
-            else f"回復まで: {fmt_td(notes.realm_currency_recovery_time)}"
+            else f"回復まで: {fmt_td(notes.remaining_realm_currency_recovery_time)}"
         )
         embed.add_field(
             name="💰 洞天宝銭",
@@ -103,7 +103,7 @@ class GenshinCommands(commands.Cog):
         elif notes.transformer.reached:
             transformer_val = "✅ **使用可能！**"
         else:
-            transformer_val = f"残り: {fmt_td(notes.transformer.recovery_time)}"
+            transformer_val = f"残り: {fmt_td(notes.transformer_recovery_time)}"
         embed.add_field(
             name="⚗️ 参量物質変化器",
             value=transformer_val,
