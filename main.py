@@ -75,22 +75,18 @@ class AtamaWaruiBot(commands.Bot):
             "hsr_rekisen_yoin": "assets/hsr/rekisen-yoin.png",
         }
 
-        target_guild = None
-        if GUILD_ID:
-            target_guild = self.get_guild(int(GUILD_ID))
-        if not target_guild and self.guilds:
-            target_guild = self.guilds[0] # 最初のギルドをフォールバックとして使用
-        
-        if not target_guild:
-            logging.warning("カスタム絵文字をアップロードするギルドが見つかりませんでした。GUILD_IDを設定するか、Botをギルドに参加させてください。")
+        try:
+            app_emojis = await self.fetch_application_emojis()
+        except Exception as e:
+            logging.error(f"アプリケーション絵文字の取得に失敗しました: {e}")
             return
 
         for name, path in emoji_map.items():
             # 既に登録されているか確認
-            existing_emoji = discord.utils.get(self.emojis, name=name)
+            existing_emoji = discord.utils.get(app_emojis, name=name)
             if existing_emoji:
                 self.custom_emojis[name] = str(existing_emoji)
-                logging.info(f"既存のカスタム絵文字を検出: {name} {self.custom_emojis[name]}")
+                logging.info(f"既存のアプリケーション絵文字を検出: {name} {self.custom_emojis[name]}")
                 continue
 
             # ファイルが存在するか確認
@@ -103,13 +99,13 @@ class AtamaWaruiBot(commands.Bot):
                     emoji_bytes = image.read()
                 
                 # 絵文字をアップロード
-                new_emoji = await target_guild.create_custom_emoji(name=name, image=emoji_bytes)
+                new_emoji = await self.create_application_emoji(name=name, image=emoji_bytes)
                 self.custom_emojis[name] = str(new_emoji)
-                logging.info(f"カスタム絵文字を登録しました: {name} {self.custom_emojis[name]}")
+                logging.info(f"アプリケーション絵文字を登録しました: {name} {self.custom_emojis[name]}")
             except discord.HTTPException as e:
-                logging.error(f"カスタム絵文字 {name} の登録に失敗しました: {e} (ギルド: {target_guild.name}, ID: {target_guild.id})")
+                logging.error(f"アプリケーション絵文字 {name} の登録に失敗しました: {e}")
             except Exception as e:
-                logging.error(f"カスタム絵文字 {name} の登録中に予期せぬエラーが発生しました: {e}")
+                logging.error(f"アプリケーション絵文字 {name} の登録中に予期せぬエラーが発生しました: {e}")
 
     async def on_ready(self):
         logging.info(f"Logged in as {self.user} (ID: {self.user.id})")
