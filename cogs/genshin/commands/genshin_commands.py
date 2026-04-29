@@ -107,12 +107,16 @@ class GenshinCommands(commands.Cog):
         embed.add_field(name="​", value="​", inline=False)
 
         # デイリー任務
-        if notes.claimed_commission_reward:
+        claimed = getattr(notes, "claimed_commission_reward", False)
+        completed = getattr(notes, "completed_commissions", getattr(notes, "current_commissions", 0))
+        total = getattr(notes, "max_commissions", getattr(notes, "total_commissions", 4))
+
+        if claimed:
             commission_val = "✅ 達成 & 報酬受取済み"
-        elif notes.completed_commissions >= notes.total_commissions:
+        elif completed >= total:
             commission_val = "☑️ 達成済み（報酬未受取）"
         else:
-            commission_val = f"⏳ {notes.completed_commissions} / {notes.total_commissions} 完了"
+            commission_val = f"⏳ {completed} / {total} 完了"
         embed.add_field(
             name=f"{self.bot.custom_emojis.get('genshin_daily', '📋')} デイリー任務",
             value=commission_val,

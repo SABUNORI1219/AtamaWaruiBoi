@@ -71,33 +71,43 @@ class GenshinTasks(commands.Cog):
         # 天然樹脂が溢れそう (180以上)
         RESIN_THRESHOLD = 180
         if notes.current_resin >= RESIN_THRESHOLD and self.last_resin < RESIN_THRESHOLD:
-            await channel.send(
-                f"{self.bot.custom_emojis.get('genshin_jusi', '🌙')} **[原神]** 天然樹脂が溢れそうです！"
-                f" `{notes.current_resin}/{notes.max_resin}`"
+            embed = discord.Embed(
+                description=f"{self.bot.custom_emojis.get('genshin_jusi', '🌙')} **[原神]** 天然樹脂が溢れそうです！\n`{notes.current_resin}/{notes.max_resin}`",
+                color=0x4A90D9
             )
+            await channel.send(embed=embed)
         self.last_resin = notes.current_resin
 
         # 洞天宝銭が溢れそう (2000以上)
         REALM_THRESHOLD = 2000
         if notes.current_realm_currency >= REALM_THRESHOLD and self.last_realm_currency < REALM_THRESHOLD:
-            await channel.send(
-                f"{self.bot.custom_emojis.get('genshin_douten_housen', '💰')} **[原神]** 洞天宝銭が溢れそうです！"
-                f" `{notes.current_realm_currency}/{notes.max_realm_currency}`"
+            embed = discord.Embed(
+                description=f"{self.bot.custom_emojis.get('genshin_douten_housen', '💰')} **[原神]** 洞天宝銭が溢れそうです！\n`{notes.current_realm_currency}/{notes.max_realm_currency}`",
+                color=0x4A90D9
             )
+            await channel.send(embed=embed)
         self.last_realm_currency = notes.current_realm_currency
 
         # デイリー任務 (21時以降で未受取)
         now_jst = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
         if now_jst.hour >= 21 and not notes.claimed_commission_reward:
             if self.last_daily_notification_date != now_jst.date():
-                await channel.send(f"{self.bot.custom_emojis.get('genshin_daily', '⚠️')} **[原神]** 21時を過ぎていますが、デイリー任務の追加報酬が未受取です！忘れずにキャサリンへ！")
+                embed = discord.Embed(
+                    description=f"{self.bot.custom_emojis.get('genshin_daily', '⚠️')} **[原神]** 21時を過ぎていますが、デイリー任務の追加報酬が未受取です！忘れずにキャサリンへ！",
+                    color=0x4A90D9
+                )
+                await channel.send(embed=embed)
                 self.last_daily_notification_date = now_jst.date()
 
         # 参量物質変化器が使用可能
         t_time = getattr(notes, "remaining_transformer_recovery_time", getattr(notes, "transformer_recovery_time", None))
         current_transformer_reached = (t_time is not None and hasattr(t_time, "total_seconds") and t_time.total_seconds() <= 0)
         if current_transformer_reached and not self.last_transformer_reached:
-            await channel.send(f"{self.bot.custom_emojis.get('genshin_sanryou_bussitu_henkaki', '⚗️')} **[原神]** 参量物質変化器が使用可能になりました！")
+            embed = discord.Embed(
+                description=f"{self.bot.custom_emojis.get('genshin_sanryou_bussitu_henkaki', '⚗️')} **[原神]** 参量物質変化器が使用可能になりました！",
+                color=0x4A90D9
+            )
+            await channel.send(embed=embed)
         self.last_transformer_reached = current_transformer_reached
 
         # 探索派遣が完了（差分を個別に通知）
@@ -112,7 +122,11 @@ class GenshinTasks(commands.Cog):
             newly_completed = current_completed - self.completed_expeditions
             if newly_completed:
                 names = ", ".join(newly_completed)
-                await channel.send(f"{self.bot.custom_emojis.get('genshin_tansaku_haken', '🗺️')} **[原神]** 探索派遣が完了しました！ ({names})")
+                embed = discord.Embed(
+                    description=f"{self.bot.custom_emojis.get('genshin_tansaku_haken', '🗺️')} **[原神]** 探索派遣が完了しました！ ({names})",
+                    color=0x4A90D9
+                )
+                await channel.send(embed=embed)
             self.completed_expeditions = current_completed
 
     @check_status.before_loop
