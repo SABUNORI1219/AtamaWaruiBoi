@@ -50,11 +50,28 @@ class GenshinCommands(commands.Cog):
             await interaction.followup.send(f"データ取得に失敗しました: {e}", ephemeral=True)
             return
 
+        author_name = f"UID: {GENSHIN_UID}"
+        author_icon = None
+        try:
+            user = await client.get_genshin_user(GENSHIN_UID)
+            if user and hasattr(user, "info"):
+                nickname = getattr(user.info, "nickname", "Unknown")
+                level = getattr(user.info, "level", "?")
+                author_name = f"{nickname} (Lv.{level})"
+                author_icon = getattr(user.info, "icon", getattr(user.info, "avatar_url", None))
+        except Exception:
+            pass # 戦績非公開などの場合はデフォルト（UIDのみ）を使用
+
         embed = discord.Embed(
             title="🌸 原神 ゲームステータス",
             color=0x4A90D9,
             timestamp=datetime.datetime.now(datetime.timezone.utc),
         )
+        
+        if author_icon:
+            embed.set_author(name=author_name, icon_url=author_icon)
+        else:
+            embed.set_author(name=author_name)
 
         # 天然樹脂
         resin_full = notes.current_resin >= notes.max_resin

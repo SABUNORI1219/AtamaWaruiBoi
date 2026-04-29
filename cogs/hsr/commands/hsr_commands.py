@@ -50,11 +50,28 @@ class HSRCommands(commands.Cog):
             await interaction.followup.send(f"データ取得に失敗しました: {e}", ephemeral=True)
             return
 
+        author_name = f"UID: {HSR_UID}"
+        author_icon = None
+        try:
+            user = await client.get_starrail_user(HSR_UID)
+            if user and hasattr(user, "info"):
+                nickname = getattr(user.info, "nickname", "Unknown")
+                level = getattr(user.info, "level", "?")
+                author_name = f"{nickname} (Lv.{level})"
+                author_icon = getattr(user.info, "icon", getattr(user.info, "avatar_url", None))
+        except Exception:
+            pass # 戦績非公開などの場合はデフォルト（UIDのみ）を使用
+
         embed = discord.Embed(
             title="🚂 崩壊：スターレイル ゲームステータス",
             color=0x9B59B6,
             timestamp=datetime.datetime.now(datetime.timezone.utc),
         )
+        
+        if author_icon:
+            embed.set_author(name=author_name, icon_url=author_icon)
+        else:
+            embed.set_author(name=author_name)
 
         # 開拓力
         stamina_full = notes.current_stamina >= notes.max_stamina
