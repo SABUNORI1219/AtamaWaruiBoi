@@ -130,7 +130,7 @@ class GenshinCommands(commands.Cog):
         elif t_time.total_seconds() <= 0:
             transformer_val = "✅ **使用可能！**"
         else:
-            transformer_val = "❌ **使用不可**"
+            transformer_val = "⏳ **現在使用済み**"
         embed.add_field(
             name=f"{self.bot.custom_emojis.get('genshin_sanryou_bussitu_henkaki', '⚗️')} 参量物質変化器",
             value=transformer_val,
