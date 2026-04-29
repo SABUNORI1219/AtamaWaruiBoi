@@ -1,5 +1,6 @@
 import os
 import logging
+import datetime
 import genshin
 import discord
 from discord.ext import commands, tasks
@@ -29,6 +30,7 @@ class GenshinTasks(commands.Cog):
         self.last_realm_currency = -1
         self.last_transformer_reached = False
         self.completed_expeditions = set()
+        self.last_daily_notification_date = None
         self.is_first_run = True
         self.check_status.start()
 
@@ -57,28 +59,39 @@ class GenshinTasks(commands.Cog):
             t_time = getattr(notes, "remaining_transformer_recovery_time", getattr(notes, "transformer_recovery_time", None))
             self.last_transformer_reached = (t_time is not None and hasattr(t_time, "total_seconds") and t_time.total_seconds() <= 0)
             if notes.expeditions:
-                self.completed_expeditions = {
-                    (exp.character.name if hasattr(exp.character, 'name') else str(exp.character))
-                    for exp in notes.expeditions if exp.status == "Finished"
-                }
+                self.completed_expeditions = set()
+                for i, exp in enumerate(notes.expeditions, 1):
+                    if exp.status == "Finished":
+                        char_obj = getattr(exp, "character", None)
+                        char_name = getattr(char_obj, "name", None) if char_obj else getattr(exp, "character_name", f"派遣{i}")
+                        self.completed_expeditions.add(char_name)
             self.is_first_run = False
             return
 
-        # 天然樹脂が満タン
-        if notes.current_resin >= notes.max_resin and self.last_resin < notes.max_resin:
+        # 天然樹脂が溢れそう (180以上)
+        RESIN_THRESHOLD = 180
+        if notes.current_resin >= RESIN_THRESHOLD and self.last_resin < RESIN_THRESHOLD:
             await channel.send(
-                f"🌙 **[原神]** 天然樹脂が満タンになりました！"
+                f"🌙 **[原神]** 天然樹脂が溢れそうです！"
                 f" `{notes.current_resin}/{notes.max_resin}`"
             )
         self.last_resin = notes.current_resin
 
-        # 洞天宝銭が満タン
-        if notes.current_realm_currency >= notes.max_realm_currency and self.last_realm_currency < notes.max_realm_currency:
+        # 洞天宝銭が溢れそう (2000以上)
+        REALM_THRESHOLD = 2000
+        if notes.current_realm_currency >= REALM_THRESHOLD and self.last_realm_currency < REALM_THRESHOLD:
             await channel.send(
-                f"💰 **[原神]** 洞天宝銭が満タンになりました！"
+                f"💰 **[原神]** 洞天宝銭が溢れそうです！"
                 f" `{notes.current_realm_currency}/{notes.max_realm_currency}`"
             )
         self.last_realm_currency = notes.current_realm_currency
+
+        # デイリー任務 (21時以降で未受取)
+        now_jst = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
+        if now_jst.hour >= 21 and not notes.claimed_commission_reward:
+            if self.last_daily_notification_date != now_jst.date():
+                await channel.send("⚠️ **[原神]** 21時を過ぎていますが、デイリー任務の追加報酬が未受取です！忘れずにキャサリンへ！")
+                self.last_daily_notification_date = now_jst.date()
 
         # 参量物質変化器が使用可能
         t_time = getattr(notes, "remaining_transformer_recovery_time", getattr(notes, "transformer_recovery_time", None))
@@ -89,10 +102,13 @@ class GenshinTasks(commands.Cog):
 
         # 探索派遣が完了（差分を個別に通知）
         if notes.expeditions:
-            current_completed = {
-                (exp.character.name if hasattr(exp.character, 'name') else str(exp.character))
-                for exp in notes.expeditions if exp.status == "Finished"
-            }
+            current_completed = set()
+            for i, exp in enumerate(notes.expeditions, 1):
+                if exp.status == "Finished":
+                    char_obj = getattr(exp, "character", None)
+                    char_name = getattr(char_obj, "name", None) if char_obj else getattr(exp, "character_name", f"派遣{i}")
+                    current_completed.add(char_name)
+            
             newly_completed = current_completed - self.completed_expeditions
             if newly_completed:
                 names = ", ".join(newly_completed)

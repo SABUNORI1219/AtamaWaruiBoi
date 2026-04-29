@@ -116,11 +116,9 @@ class GenshinCommands(commands.Cog):
         # 探索派遣
         if notes.expeditions:
             lines = []
-            for exp in notes.expeditions:
-                try:
-                    char = exp.character.name
-                except AttributeError:
-                    char = str(exp.character)
+            for i, exp in enumerate(notes.expeditions, 1):
+                char_obj = getattr(exp, "character", None)
+                char = getattr(char_obj, "name", None) if char_obj else getattr(exp, "character_name", f"派遣{i}")
                 if exp.status == "Finished":
                     lines.append(f"✅ {char}")
                 else:
