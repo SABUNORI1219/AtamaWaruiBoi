@@ -85,13 +85,9 @@ class AtamaWaruiBot(commands.Bot):
             # 既に登録されているか確認
             existing_emoji = discord.utils.get(app_emojis, name=name)
             if existing_emoji:
-                try:
-                    await existing_emoji.delete()
-                    logging.info(f"画像の更新のため、既存の絵文字を削除しました: {name}")
-                except Exception as e:
-                    logging.error(f"既存の絵文字の削除に失敗しました: {e}")
-                    self.custom_emojis[name] = str(existing_emoji)
-                    continue
+                self.custom_emojis[name] = str(existing_emoji)
+                logging.info(f"既存のアプリケーション絵文字を検出: {name} {self.custom_emojis[name]}")
+                continue
 
             # ファイルが存在するか確認
             if not os.path.exists(path):
