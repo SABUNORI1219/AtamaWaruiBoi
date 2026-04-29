@@ -98,12 +98,13 @@ class GenshinCommands(commands.Cog):
         )
 
         # 参量物質変化器
-        if notes.transformer is None:
-            transformer_val = "未取得"
-        elif notes.transformer.reached:
+        t_time = getattr(notes, "remaining_transformer_recovery_time", getattr(notes, "transformer_recovery_time", None))
+        if t_time is None or not hasattr(t_time, "total_seconds"):
+            transformer_val = "未取得または情報なし"
+        elif t_time.total_seconds() <= 0:
             transformer_val = "✅ **使用可能！**"
         else:
-            transformer_val = f"残り: {fmt_td(notes.transformer_recovery_time)}"
+            transformer_val = f"残り: {fmt_td(t_time)}"
         embed.add_field(
             name="⚗️ 参量物質変化器",
             value=transformer_val,

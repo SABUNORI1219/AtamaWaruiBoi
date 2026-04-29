@@ -53,7 +53,9 @@ class GenshinTasks(commands.Cog):
         if self.is_first_run:
             self.last_resin = notes.current_resin
             self.last_realm_currency = notes.current_realm_currency
-            self.last_transformer_reached = bool(notes.transformer and notes.transformer.reached)
+            
+            t_time = getattr(notes, "remaining_transformer_recovery_time", getattr(notes, "transformer_recovery_time", None))
+            self.last_transformer_reached = (t_time is not None and hasattr(t_time, "total_seconds") and t_time.total_seconds() <= 0)
             if notes.expeditions:
                 self.completed_expeditions = {
                     (exp.character.name if hasattr(exp.character, 'name') else str(exp.character))
@@ -79,7 +81,8 @@ class GenshinTasks(commands.Cog):
         self.last_realm_currency = notes.current_realm_currency
 
         # 参量物質変化器が使用可能
-        current_transformer_reached = bool(notes.transformer and notes.transformer.reached)
+        t_time = getattr(notes, "remaining_transformer_recovery_time", getattr(notes, "transformer_recovery_time", None))
+        current_transformer_reached = (t_time is not None and hasattr(t_time, "total_seconds") and t_time.total_seconds() <= 0)
         if current_transformer_reached and not self.last_transformer_reached:
             await channel.send("⚗️ **[原神]** 参量物質変化器が使用可能になりました！")
         self.last_transformer_reached = current_transformer_reached
