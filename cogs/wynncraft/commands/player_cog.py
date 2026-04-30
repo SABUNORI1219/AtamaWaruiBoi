@@ -303,7 +303,7 @@ class PlayerCog(commands.Cog):
         return raid_list.get(raid_key, 0)
 
     async def handle_player_data(self, interaction, data, use_edit=False):
-        from cogs.player_cog import build_profile_info  # 循環import回避用
+        from cogs.wynncraft.commands.player_cog import build_profile_info  # 循環import回避用
         profile_info = await build_profile_info(data, self.wynn_api, self.banner_renderer)
 
         uuid = profile_info.get("uuid")

@@ -11,7 +11,8 @@ from cogs.wynncraft.libs.api_stocker import WynncraftAPI
 
 logger = logging.getLogger(__name__)
 
-FONT_PATH = os.path.join(os.path.dirname(__file__), "../assets/wynncraft/fonts/Minecraftia-Regular.ttf")
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+FONT_PATH = os.path.join(PROJECT_ROOT, "assets/wynncraft/fonts/Minecraftia-Regular.ttf")
 BANNER_PLACEHOLDER = None
 
 CANVAS_WIDTH = 700
@@ -37,7 +38,7 @@ def _load_icon(icon_path, size=None):
     except Exception:
         return None
 
-ICON_DIR = os.path.join(os.path.dirname(__file__), "../assets/wynncraft/guild_profile")
+ICON_DIR = os.path.join(PROJECT_ROOT, "assets/wynncraft/guild_profile")
 ICON_PATHS = {
     "member": os.path.join(ICON_DIR, "Member_Icon.png"),
     "war": os.path.join(ICON_DIR, "WarCount_Icon.png"),

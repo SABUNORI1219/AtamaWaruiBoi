@@ -5,17 +5,18 @@ import os
 
 logger = logging.getLogger(__name__)
 
-FONT_PATH = os.path.join(os.path.dirname(__file__), "../assets/wynncraft/fonts/Minecraftia-Regular.ttf")
-BASE_IMG_PATH = os.path.join(os.path.dirname(__file__), "../assets/wynncraft/profile/profile_card.png")
-PLAYER_BACKGROUND_PATH = os.path.join(os.path.dirname(__file__), "../assets/wynncraft/profile/IMG_1493.png")
-RANK_STAR_PATH = os.path.join(os.path.dirname(__file__), "../assets/wynncraft/profile/rankStar.png")
-UNKNOWN_SKIN_PATH = os.path.join(os.path.dirname(__file__), "../assets/wynncraft/profile/unknown_skin.png")
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+FONT_PATH = os.path.join(PROJECT_ROOT, "assets/wynncraft/fonts/Minecraftia-Regular.ttf")
+BASE_IMG_PATH = os.path.join(PROJECT_ROOT, "assets/wynncraft/profile/profile_card.png")
+PLAYER_BACKGROUND_PATH = os.path.join(PROJECT_ROOT, "assets/wynncraft/profile/IMG_1493.png")
+RANK_STAR_PATH = os.path.join(PROJECT_ROOT, "assets/wynncraft/profile/rankStar.png")
+UNKNOWN_SKIN_PATH = os.path.join(PROJECT_ROOT, "assets/wynncraft/profile/unknown_skin.png")
 RANK_ICON_MAP = {
-    "Champion": os.path.join(os.path.dirname(__file__), "../assets/wynncraft/profile/champ_icon.png"),
-    "Hero+": os.path.join(os.path.dirname(__file__), "../assets/wynncraft/profile/heroplus_icon.png"),
-    "Hero": os.path.join(os.path.dirname(__file__), "../assets/wynncraft/profile/hero_icon.png"),
-    "Vip+": os.path.join(os.path.dirname(__file__), "../assets/wynncraft/profile/vipplus_icon.png"),
-    "Vip": os.path.join(os.path.dirname(__file__), "../assets/wynncraft/profile/vip_icon.png"),
+    "Champion": os.path.join(PROJECT_ROOT, "assets/wynncraft/profile/champ_icon.png"),
+    "Hero+": os.path.join(PROJECT_ROOT, "assets/wynncraft/profile/heroplus_icon.png"),
+    "Hero": os.path.join(PROJECT_ROOT, "assets/wynncraft/profile/hero_icon.png"),
+    "Vip+": os.path.join(PROJECT_ROOT, "assets/wynncraft/profile/vipplus_icon.png"),
+    "Vip": os.path.join(PROJECT_ROOT, "assets/wynncraft/profile/vip_icon.png"),
 }
 RANK_COLOR_MAP = {
     "Champion": ((255, 255, 80, 230), (255, 210, 60, 200)),     # 黄色グラデ
@@ -430,4 +431,3 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     except Exception as e:
         logger.error(f"画像保存失敗: {e}")
     return output_path
-
