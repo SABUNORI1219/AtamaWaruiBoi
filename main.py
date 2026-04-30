@@ -19,6 +19,8 @@ EXTENSIONS = [
     "cogs.genshin.tasks.genshin_tasks",
     "cogs.hsr.commands.hsr_commands",
     "cogs.hsr.tasks.hsr_tasks",
+    "cogs.wynncraft.commands.guild_cog",
+    "cogs.wynncraft.commands.player_cog",
 ]
 
 
