@@ -103,7 +103,6 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     PLAYER_BACKGROUND = None
     rank_star_img = None
     guild_banner_img = None
-    icon_img = None
     dummy = None
     try:
         with Image.open(BASE_IMG_PATH) as base_img:
@@ -115,7 +114,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
         with Image.open(PLAYER_BACKGROUND_PATH) as bg_img:
             PLAYER_BACKGROUND = bg_img.convert("RGBA")
             # テンプレートの枠に合わせてサイズを強制的に変更する (幅, 高さ)
-            PLAYER_BACKGROUND = PLAYER_BACKGROUND.resize((680, 250), Image.LANCZOS)
+            PLAYER_BACKGROUND = PLAYER_BACKGROUND.resize((200, 250), Image.LANCZOS)
     except Exception as e:
         logger.error(f"PLAYER_BACKGROUND_PATH 読み込み失敗: {e}")
         PLAYER_BACKGROUND = Image.new("RGBA", (200, 200), (200, 200, 200, 255))
@@ -139,7 +138,6 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
         font_raids = ImageFont.truetype(FONT_PATH, 35)
         font_uuid = ImageFont.truetype(FONT_PATH, 30)
         font_mini = ImageFont.truetype(FONT_PATH, 25)
-        font_rank = ImageFont.truetype(FONT_PATH, 16)
         font_prefix = ImageFont.truetype(FONT_PATH, 12)
     except Exception as e:
         logger.error(f"FONT_PATH 読み込み失敗: {e}")
@@ -159,8 +157,8 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     elif banner_bytes and isinstance(banner_bytes, str):
         guild_banner_img = None
 
-    banner_x = 350
-    banner_y = 230
+    banner_x = 340
+    banner_y = 220
     banner_size = (76, 150)
     if guild_banner_img:
         guild_banner_img = guild_banner_img.resize(banner_size, Image.LANCZOS)
@@ -200,12 +198,12 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
         draw.text((text_x, text_y), prefix_text, font=prefix_font, fill=(240,240,240,255))
         
     # 背景の貼り付け (X座標, Y座標)
-    bg_paste_x, bg_paste_y = 110, 280
+    bg_paste_x, bg_paste_y = 100, 250
     img.paste(PLAYER_BACKGROUND, (bg_paste_x, bg_paste_y), mask=PLAYER_BACKGROUND)
     if skin_image:
         try:
             skin = skin_image.resize((196, 196), Image.LANCZOS)
-            img.paste(skin, (106, 340), mask=skin)
+            img.paste(skin, (110, 300), mask=skin)
         except Exception as e:
             logger.error(f"Skin image process failed: {e}")
             # fallback
@@ -246,7 +244,11 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
         try:
             with Image.open(rank_img_path) as original_rank_img:
                 rank_rgba = original_rank_img.convert("RGBA")
-                rank_w, rank_h = rank_rgba.size
+                orig_w, orig_h = rank_rgba.size
+                
+                # 3倍にリサイズ
+                rank_w, rank_h = orig_w * 3, orig_h * 3
+                rank_rgba = rank_rgba.resize((rank_w, rank_h), Image.LANCZOS)
                 
                 skin_x, skin_y, skin_w, skin_h = 106, 336, 196, 196
                 rank_paste_x = skin_x + (skin_w // 2) - (rank_w // 2)
@@ -303,18 +305,18 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     draw.text((text_x, text_y), f"{server_display}", font=font_main, fill=(60,40,30,255))
     draw.text((330, text_y+75), f"Class: {active_char_info}", font=font_main, fill=(60,40,30,255))
 
-    draw.text((90, 610), "First Join:", font=font_mini, fill=(60,40,30,255))
-    draw.text((110, 660), f"First Join: {info.get('first_join', 'N/A')}", font=font_mini, fill=(60,40,30,255))
+    draw.text((80, 410), "First Join:", font=font_mini, fill=(60,40,30,255))
+    draw.text((100, 430), f"{info.get('first_join', 'N/A')}", font=font_mini, fill=(60,40,30,255))
 
-    draw.text((90, 685), "Last Seen:", font=font_mini, fill=(60,40,30,255))
-    draw.text((110, 735), f"Last Seen: {info.get('last_join', 'N/A')}", font=font_mini, fill=(60,40,30,255))
+    draw.text((80, 450), "Last Seen:", font=font_mini, fill=(60,40,30,255))
+    draw.text((100, 470), f"{info.get('last_join', 'N/A')}", font=font_mini, fill=(60,40,30,255))
 
-    draw.text((650, 750), "Playtime:", font=font_mini, fill=(60,40,30,255))
+    draw.text((80, 490), "Playtime:", font=font_mini, fill=(60,40,30,255))
     playtime_text = fmt_num(info.get('playtime', 0))
-    draw.text((670, 800), playtime_text, font=font_mini, fill=(60,40,30,255))
-    bbox = draw.textbbox((670, 800), playtime_text, font=font_mini)
+    draw.text((100, 510), playtime_text, font=font_mini, fill=(60,40,30,255))
+    bbox = draw.textbbox((100, 510), playtime_text, font=font_mini)
     x_hours = bbox[2] + 3
-    draw.text((x_hours, 800 + 18), "hours", font=font_mini, fill=(60,40,30,255))
+    draw.text((x_hours, 510 + 18), "hours", font=font_mini, fill=(60,40,30,255))
     
     draw.text((90, 800), "Mobs", font=font_sub, fill=(60,40,30,255))
     draw.text((330, 800), fmt_num(info.get('mobs_killed', 0)), font=font_sub, fill=(60,40,30,255))
