@@ -71,24 +71,23 @@ async def build_profile_info(data, wynn_api, banner_renderer):
             return "???"
         return raid_stats.get(raidstats_key, "???")
 
-    raw_support_rank = safe_get(data, ['supportRank'], "None")
-    if raw_support_rank and raw_support_rank.lower() == "vipplus":
-        support_rank_display = "Vip+"
-    elif raw_support_rank and raw_support_rank.lower() == "heroplus":
-        support_rank_display = "Hero+"
-    else:
-        support_rank_display = (raw_support_rank or 'None').capitalize()
-
     first_join_str = safe_get(data, ['firstJoin'], "???")
-    first_join_date = first_join_str.split('T')[0] if first_join_str and 'T' in first_join_str else first_join_str
+    if first_join_str and isinstance(first_join_str, str) and 'T' in first_join_str:
+        try:
+            first_join_dt = datetime.fromisoformat(first_join_str.replace('Z', '+00:00'))
+            first_join_date = first_join_dt.strftime('%Y-%m-%d %H:%M:%S')
+        except Exception:
+            first_join_date = first_join_str.replace('T', ' ').split('.')[0]
+    else:
+        first_join_date = first_join_str if first_join_str else "???"
 
     last_join_str = safe_get(data, ['lastJoin'], "???")
     if last_join_str and isinstance(last_join_str, str) and 'T' in last_join_str:
         try:
             last_join_dt = datetime.fromisoformat(last_join_str.replace('Z', '+00:00'))
-            last_join_date = last_join_dt.strftime('%Y-%m-%d')
+            last_join_date = last_join_dt.strftime('%Y-%m-%d %H:%M:%S')
         except Exception:
-            last_join_date = last_join_str.split('T')[0]
+            last_join_date = last_join_str.replace('T', ' ').split('.')[0]
     else:
         last_join_date = last_join_str if last_join_str else "???"
 
@@ -117,6 +116,7 @@ async def build_profile_info(data, wynn_api, banner_renderer):
         else:
             active_char_info = f"{char_type}"
 
+    support_rank = safe_get(data, ['supportRank'], "None")
     mobs_killed = fallback_stat(data, ['globalData', 'mobsKilled'])
     playtime = data.get("playtime", "???") if data.get("playtime", None) is not None else "???"
     wars = fallback_stat(data, ['globalData', 'wars'])
@@ -169,7 +169,7 @@ async def build_profile_info(data, wynn_api, banner_renderer):
 
     profile_info = {
         "username": data.get("username"),
-        "support_rank_display": support_rank_display,
+        "support_rank": support_rank,
         "guild_prefix": guild_prefix,
         "banner_bytes": banner_bytes,
         "guild_name": guild_name,

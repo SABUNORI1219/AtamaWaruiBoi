@@ -11,21 +11,6 @@ BASE_IMG_PATH = os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/prof
 PLAYER_BACKGROUND_PATH = os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/background.png")
 RANK_STAR_PATH = os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/rankStar.png")
 UNKNOWN_SKIN_PATH = os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/unknown_skin.png")
-RANK_ICON_MAP = {
-    "Champion": os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/CHAMPION.png"),
-    "Hero+": os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/HERO+.png"),
-    "Hero": os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/HERO.png"),
-    "Vip+": os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/VIP+.png"),
-    "Vip": os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/VIP.png"),
-}
-RANK_COLOR_MAP = {
-    "Champion": ((255, 255, 80, 230), (255, 210, 60, 200)),     # 黄色グラデ
-    "Hero+": ((255, 40, 255, 230), (180, 0, 120, 200)),         # マゼンタ
-    "Hero": ((170, 90, 255, 230), (60, 0, 160, 200)),           # 紫
-    "Vip+": ((80, 255, 255, 230), (40, 170, 255, 200)),         # 水色
-    "Vip": ((80, 255, 120, 230), (0, 190, 40, 200)),            # 緑
-    "None": ((160, 160, 160, 220), (80, 80, 80, 200)),          # 灰色
-}
 
 def gradient_rect(size, color_top, color_bottom, radius):
     w, h = size
@@ -129,6 +114,8 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     try:
         with Image.open(PLAYER_BACKGROUND_PATH) as bg_img:
             PLAYER_BACKGROUND = bg_img.convert("RGBA")
+            # テンプレートの枠に合わせてサイズを強制的に変更する (幅, 高さ)
+            PLAYER_BACKGROUND = PLAYER_BACKGROUND.resize((680, 250), Image.LANCZOS)
     except Exception as e:
         logger.error(f"PLAYER_BACKGROUND_PATH 読み込み失敗: {e}")
         PLAYER_BACKGROUND = Image.new("RGBA", (200, 200), (200, 200, 200, 255))
@@ -158,7 +145,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
         logger.error(f"FONT_PATH 読み込み失敗: {e}")
         font_title = font_main = font_sub = font_small = font_uuid = font_mini = font_prefix = font_rank = ImageFont.load_default()
 
-    draw.text((90, 140), f"{info.get('username', 'No Name')}", font=font_title, fill=(60,40,30,255))
+    draw.text((90, 130), f"{info.get('username', 'No Name')}", font=font_title, fill=(60,40,30,255))
 
     banner_bytes = info.get("banner_bytes")
     guild_banner_img = None
@@ -172,8 +159,8 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     elif banner_bytes and isinstance(banner_bytes, str):
         guild_banner_img = None
 
-    banner_x = 330
-    banner_y = 250
+    banner_x = 350
+    banner_y = 230
     banner_size = (76, 150)
     if guild_banner_img:
         guild_banner_img = guild_banner_img.resize(banner_size, Image.LANCZOS)
@@ -212,7 +199,9 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
         text_y = box_y + (box_h - text_h) // 2
         draw.text((text_x, text_y), prefix_text, font=prefix_font, fill=(240,240,240,255))
         
-    img.paste(PLAYER_BACKGROUND, (110, 280), mask=PLAYER_BACKGROUND)
+    # 背景の貼り付け (X座標, Y座標)
+    bg_paste_x, bg_paste_y = 110, 280
+    img.paste(PLAYER_BACKGROUND, (bg_paste_x, bg_paste_y), mask=PLAYER_BACKGROUND)
     if skin_image:
         try:
             skin = skin_image.resize((196, 196), Image.LANCZOS)
@@ -238,56 +227,34 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
         except Exception as ee:
             logger.error(f"Unknown skin image load failed: {ee}")
 
-    rank_text = info.get('support_rank_display')
-    rank_colors = RANK_COLOR_MAP.get(rank_text, RANK_COLOR_MAP['None'])
-    rank_font = font_rank
-    rank_bbox = draw.textbbox((0,0), rank_text, font=rank_font)
-    rank_text_w = rank_bbox[2] - rank_bbox[0]
-    rank_text_h = rank_bbox[3] - rank_bbox[1]
-    icon_path = RANK_ICON_MAP.get(rank_text)
-    icon_img = None
-    icon_w, icon_h = 0, 0
-    target_icon_h = 24
-    if icon_path and os.path.exists(icon_path):
+    rank_text = info.get('support_rank')
+    rank_img_path = None
+    if rank_text:
+        rank_lower = rank_text.lower()
+        if rank_lower == "champion":
+            rank_img_path = os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/CHAMPION.png")
+        elif rank_lower == "heroplus":
+            rank_img_path = os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/HERO+.png")
+        elif rank_lower == "hero":
+            rank_img_path = os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/HERO.png")
+        elif rank_lower == "vipplus":
+            rank_img_path = os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/VIP+.png")
+        elif rank_lower == "vip":
+            rank_img_path = os.path.join(PROJECT_ROOT, "assets/wynncraft/player_profile/VIP.png")
+
+    if rank_img_path and os.path.exists(rank_img_path):
         try:
-            with Image.open(icon_path) as original_icon:
-                icon_rgba = original_icon.convert("RGBA")
-                icon_img = resize_icon_keep_ratio(icon_rgba, target_icon_h)
-                icon_w, icon_h = icon_img.size
+            with Image.open(rank_img_path) as original_rank_img:
+                rank_rgba = original_rank_img.convert("RGBA")
+                rank_w, rank_h = rank_rgba.size
+                
+                skin_x, skin_y, skin_w, skin_h = 106, 336, 196, 196
+                rank_paste_x = skin_x + (skin_w // 2) - (rank_w // 2)
+                rank_paste_y = skin_y + skin_h - 6
+                
+                img.paste(rank_rgba, (rank_paste_x, rank_paste_y), mask=rank_rgba)
         except Exception as e:
-            logger.error(f"Rank icon load failed: {e}")
-    else:
-        icon_w, icon_h = 0, target_icon_h
-
-    rank_padding_x = 12
-    rank_padding_y = 4
-    rank_box_w = icon_w + rank_padding_x + rank_text_w + rank_padding_x
-    rank_box_h = max(icon_h, rank_text_h + rank_padding_y*2)
-    skin_x = 106
-    skin_y = 336
-    skin_w = 196
-    skin_h = 196
-    
-    rank_box_x = skin_x + (skin_w // 2) - (rank_box_w // 2)
-    rank_box_y = skin_y + skin_h - 6
-
-    shadow = Image.new("RGBA", (rank_box_w+8, rank_box_h+8), (0,0,0,0))
-    shadow_draw = ImageDraw.Draw(shadow)
-    shadow_draw.rounded_rectangle([4,4,rank_box_w+4,rank_box_h+4], radius=16, fill=(0,0,0,80))
-    shadow = shadow.filter(ImageFilter.GaussianBlur(3))
-    img.paste(shadow, (rank_box_x-4, rank_box_y-4), mask=shadow)
-
-    rect_img = gradient_rect((rank_box_w, rank_box_h), rank_colors[0], rank_colors[1], radius=14)
-    img.paste(rect_img, (rank_box_x, rank_box_y), mask=rect_img)
-
-    if icon_img:
-        icon_y = rank_box_y + (rank_box_h - icon_h)//2
-        img.paste(icon_img, (rank_box_x + rank_padding_x//2, icon_y), mask=icon_img)
-        rank_text_x = rank_box_x + icon_w + rank_padding_x
-    else:
-        rank_text_x = rank_box_x + rank_padding_x
-    rank_text_y = rank_box_y + (rank_box_h - rank_text_h) // 2
-    draw.text((rank_text_x, rank_text_y), rank_text, font=rank_font, fill=(255,255,255,255))
+            logger.error(f"Rank image load failed: {e}")
 
     text_base_x = banner_x + banner_size[0] + 10
     guild_name_lines = split_guild_name_by_pixel_and_word(guild_name_display, font_main, text_base_x, 1000, draw)
@@ -336,8 +303,18 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     draw.text((text_x, text_y), f"{server_display}", font=font_main, fill=(60,40,30,255))
     draw.text((330, text_y+75), f"Class: {active_char_info}", font=font_main, fill=(60,40,30,255))
 
-    draw.text((90, 610), f"First Join: {info.get('first_join', 'N/A')}", font=font_raids, fill=(60,40,30,255))
-    draw.text((90, 685), f"Last Seen: {info.get('last_join', 'N/A')}", font=font_raids, fill=(60,40,30,255))
+    draw.text((90, 610), "First Join:", font=font_mini, fill=(60,40,30,255))
+    draw.text((110, 660), f"First Join: {info.get('first_join', 'N/A')}", font=font_mini, fill=(60,40,30,255))
+
+    draw.text((90, 685), "Last Seen:", font=font_mini, fill=(60,40,30,255))
+    draw.text((110, 735), f"Last Seen: {info.get('last_join', 'N/A')}", font=font_mini, fill=(60,40,30,255))
+
+    draw.text((650, 750), "Playtime:", font=font_mini, fill=(60,40,30,255))
+    playtime_text = fmt_num(info.get('playtime', 0))
+    draw.text((670, 800), playtime_text, font=font_mini, fill=(60,40,30,255))
+    bbox = draw.textbbox((670, 800), playtime_text, font=font_mini)
+    x_hours = bbox[2] + 3
+    draw.text((x_hours, 800 + 18), "hours", font=font_mini, fill=(60,40,30,255))
     
     draw.text((90, 800), "Mobs", font=font_sub, fill=(60,40,30,255))
     draw.text((330, 800), fmt_num(info.get('mobs_killed', 0)), font=font_sub, fill=(60,40,30,255))
@@ -347,13 +324,6 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
 
     draw.text((90, 950), "Quests", font=font_sub, fill=(60,40,30,255))
     draw.text((330, 950), fmt_num(info.get('quests', 0)), font=font_sub, fill=(60,40,30,255))
-
-    draw.text((650, 600), "Playtime", font=font_sub, fill=(60,40,30,255))
-    playtime_text = fmt_num(info.get('playtime', 0))
-    draw.text((650, 675), playtime_text, font=font_small, fill=(60,40,30,255))
-    bbox = draw.textbbox((650, 675), playtime_text, font=font_small)
-    x_hours = bbox[2] + 3
-    draw.text((x_hours, 675 + 18), "hours", font=font_mini, fill=(60,40,30,255))
 
     draw.text((650, 750), "PvP", font=font_main, fill=(60,40,30,255))
     pk_text = fmt_num(info.get('pvp_kill', 0))
