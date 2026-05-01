@@ -142,6 +142,36 @@ async def build_profile_info(data, wynn_api, banner_renderer):
         else:
             war_rank_display = str(war_rank_completion)
 
+        notg_rank_completion = ranking_obj.get('grootslangCompletion')
+        if notg_rank_completion is None:
+            notg_rank_display = "N/A"
+        else:
+            notg_rank_display = str(notg_rank_completion)
+
+        nol_rank_completion = ranking_obj.get('orphionCompletion')
+        if nol_rank_completion is None:
+            nol_rank_display = "N/A"
+        else:
+            nol_rank_display = str(nol_rank_completion)
+
+        tcc_rank_completion = ranking_obj.get('colossusCompletion')
+        if tcc_rank_completion is None:
+            tcc_rank_display = "N/A"
+        else:
+            tcc_rank_display = str(tcc_rank_completion)
+        
+        tna_rank_completion = ranking_obj.get('namelessCompletion')
+        if tna_rank_completion is None:
+            tna_rank_display = "N/A"
+        else:
+            tna_rank_display = str(tna_rank_completion)
+
+        twp_rank_completion = ranking_obj.get('frumaCompletion')
+        if twp_rank_completion is None:
+            twp_rank_display = "N/A"
+        else:
+            twp_rank_display = str(twp_rank_completion)
+
         if isinstance(ranking_obj, dict):
             # 先頭から3項目をそのまま取得
             for k, v in list(ranking_obj.items())[:3]:
@@ -182,6 +212,11 @@ async def build_profile_info(data, wynn_api, banner_renderer):
         "playtime": playtime,
         "wars": wars,
         "war_rank_display": war_rank_display,
+        "notg_rank_display": notg_rank_display,
+        "nol_rank_display": nol_rank_display,
+        "tcc_rank_display": tcc_rank_display,
+        "tna_rank_display": tna_rank_display,
+        "twp_rank_display": twp_rank_display,
         "top_ranks": top_ranks,
         "quests": quests,
         "world_events": world_events,

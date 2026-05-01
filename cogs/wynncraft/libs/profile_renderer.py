@@ -174,7 +174,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
                 name_h = bbox_name[3] - bbox_name[1]
                 rank_paste_y = name_y + (name_h // 2) - (rank_h // 2)
                 img.paste(rank_rgba, (name_start_x, rank_paste_y), mask=rank_rgba)
-                name_start_x += rank_w + 15
+                name_start_x += rank_w + 14
         except Exception as e:
             logger.error(f"Rank image load failed: {e}")
 
@@ -365,10 +365,16 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     draw.text((670 - (bbox_war_rank[2] - bbox_war_rank[0]), 770), war_rank_text, font=font_mini, fill=(60,40,30,255))
 
     draw.text((690, 520), "First Join:", font=font_mini, fill=(60,40,30,255))
-    draw.text((705, 555), f"{info.get('first_join', 'N/A')}", font=font_tiny, fill=(60,40,30,255))
+    fj_text = f"{info.get('first_join', 'N/A')}"
+    bbox_fj = draw.textbbox((0, 0), fj_text, font=font_tiny)
+    fj_width = bbox_fj[2] - bbox_fj[0]
+    draw.text((975 - fj_width, 555), fj_text, font=font_tiny, fill=(60,40,30,255))
 
     draw.text((690, 590), "Last Seen:", font=font_mini, fill=(60,40,30,255))
-    draw.text((705, 625), f"{info.get('last_join', 'N/A')}", font=font_tiny, fill=(60,40,30,255))
+    lj_text = f"{info.get('last_join', 'N/A')}"
+    bbox_lj = draw.textbbox((0, 0), lj_text, font=font_tiny)
+    lj_width = bbox_lj[2] - bbox_lj[0]
+    draw.text((975 - lj_width, 625), lj_text, font=font_tiny, fill=(60,40,30,255))
 
     draw.text((690, 660), "Playtime:", font=font_mini, fill=(60,40,30,255))
     playtime_text = fmt_num(info.get('playtime', 0))
@@ -380,14 +386,15 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     playtime_width = bbox_playtime[2] - bbox_playtime[0]
     draw.text((x_hours - 3 - playtime_width, 690), playtime_text, font=font_mini, fill=(60,40,30,255))
 
-    raid_stat_y = 905
+    raid_stat_y = 900
     draw.text((70, 845), "Raid Completions", font=font_raids, fill=(90,60,30,255))
     draw.text((70, raid_stat_y), "Content", font=font_mini, fill=(60,40,30,255))
-    draw.text((200, raid_stat_y), "Normal", font=font_mini, fill=(60,40,30,255))
-    draw.text((250, raid_stat_y), "Guild", font=font_mini, fill=(60,40,30,255))
-    draw.text((450, raid_stat_y), "Total", font=font_mini, fill=(60,40,30,255))
+    draw.text((240, raid_stat_y), "Normal", font=font_mini, fill=(60,40,30,255))
+    draw.text((310, raid_stat_y), "Guild", font=font_mini, fill=(60,40,30,255))
+    draw.text((440, raid_stat_y), "Total", font=font_mini, fill=(60,40,30,255))
+    draw.text((550, raid_stat_y), "Rank", font=font_mini, fill=(60,40,30,255))
 
-    raid_right_edge_x = 250
+    raid_right_edge_x = 300
     graid_right_edge_x = 420
     raid_keys = [("NOTG", "notg", "graid_notg", 938), ("NOL", "nol", "graid_nol", 977), ("TCC", "tcc", "graid_tcc", 1016),
                  ("TNA", "tna", "graid_tna", 1055), ("TWP", "twp", "graid_twp", 1094), ("Total", "all_raids", "all_guild_raids", 1133)]
@@ -416,7 +423,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
         x = graid_right_edge_x - text_width
         draw.text((x, y), num_text, font=font_mini, fill=(60,40,30,255))
 
-    total_raids_x = 450
+    total_raids_x = 440
     notg_text = fmt_num(info.get('notg', 0))
     nol_text = fmt_num(info.get('nol', 0))
     tcc_text = fmt_num(info.get('tcc', 0))
@@ -430,6 +437,27 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     draw.text((total_raids_x, 1094), twp_text, font=font_mini, fill=(60,40,30,255))
     draw.text((total_raids_x, 1133), total_text, font=font_mini, fill=(60,40,30,255))
 
+    raid_ranks = [
+        (info.get('notg_rank_display', 'N/A'), 938),
+        (info.get('nol_rank_display', 'N/A'), 977),
+        (info.get('tcc_rank_display', 'N/A'), 1016),
+        (info.get('tna_rank_display', 'N/A'), 1055),
+        (info.get('twp_rank_display', 'N/A'), 1094)
+    ]
+    rank_right_edge_x = 600
+    for rank_val, y in raid_ranks:
+        if rank_val not in ("N/A", "非公開", None):
+            try:
+                rank_text = f"#{fmt_num(int(rank_val))}"
+            except (ValueError, TypeError):
+                rank_text = f"#{rank_val}"
+        else:
+            rank_text = str(rank_val) if rank_val else "N/A"
+            
+        bbox = draw.textbbox((0, 0), rank_text, font=font_mini)
+        text_width = bbox[2] - bbox[0]
+        x = rank_right_edge_x - text_width
+        draw.text((x, y), rank_text, font=font_mini, fill=(60,40,30,255))
 
     top_ranks = info.get("top_ranks", [])
     if top_ranks:
