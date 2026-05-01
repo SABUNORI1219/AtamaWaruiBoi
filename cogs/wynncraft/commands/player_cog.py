@@ -47,6 +47,29 @@ async def build_profile_info(data, wynn_api, banner_renderer):
         if not raid_list or not isinstance(raid_list, dict):
             return "???"
         return raid_list.get(raid_key, 0)
+    
+    def get_guild_raid_stat(data, graid_key):
+        global_data = data.get("globalData")
+        if not global_data or not isinstance(global_data, dict):
+            return "???"
+        guild_raids = global_data.get("guildRaids")
+        if not guild_raids or not isinstance(guild_raids, dict):
+            return "???"
+        guild_raid_list = guild_raids.get("list")
+        if guild_raid_list == {}:
+            return 0
+        if not guild_raid_list or not isinstance(guild_raid_list, dict):
+            return "???"
+        return guild_raid_list.get(graid_key, 0)
+    
+    def get_raidstats_stat(data, raidstats_key):
+        global_data = data.get("globalData")
+        if not global_data or not isinstance(global_data, dict):
+            return "???"
+        raid_stats = global_data.get("raidStats")
+        if not raid_stats or not isinstance(raid_stats, dict):
+            return "???"
+        return raid_stats.get(raidstats_key, "???")
 
     raw_support_rank = safe_get(data, ['supportRank'], "None")
     if raw_support_rank and raw_support_rank.lower() == "vipplus":
@@ -101,12 +124,15 @@ async def build_profile_info(data, wynn_api, banner_renderer):
     world_events = fallback_stat(data, ['globalData', 'worldEvents'])
     total_level = fallback_stat(data, ['globalData', 'totalLevel'])
     chests = fallback_stat(data, ['globalData', 'chestsFound'])
+    caves = fallback_stat(data, ['globalData', 'caves'])
     pvp_kill = str(safe_get(data, ['globalData', 'pvp', 'kills'], "???"))
     pvp_death = str(safe_get(data, ['globalData', 'pvp', 'deaths'], "???"))
     dungeons = fallback_stat(data, ['globalData', 'dungeons', 'total'])
     all_raids = fallback_stat(data, ['globalData', 'raids', 'total'])
+    all_guild_raids = fallback_stat(data, ['globalData', 'guildRaids', 'total'])
 
     ranking_obj = safe_get(data, ['ranking'], None)
+    top_ranks = []
     if ranking_obj is None:
         war_rank_display = "非公開"
     else:
@@ -116,10 +142,28 @@ async def build_profile_info(data, wynn_api, banner_renderer):
         else:
             war_rank_display = str(war_rank_completion)
 
+        if isinstance(ranking_obj, dict):
+            # 先頭から3項目をそのまま取得
+            for k, v in list(ranking_obj.items())[:3]:
+                formatted_key = ''.join([' ' + c if c.isupper() else c for c in k]).strip().title()
+                top_ranks.append({"category": formatted_key, "rank": v})
+
     notg = get_raid_stat(data, 'Nest of the Grootslangs')
     nol = get_raid_stat(data, "Orphion's Nexus of Light")
     tcc = get_raid_stat(data, 'The Canyon Colossus')
     tna = get_raid_stat(data, 'The Nameless Anomaly')
+    twp = get_raid_stat(data, 'The Wartorn Palace')
+    graid_notg = get_guild_raid_stat(data, 'Nest of the Grootslangs')
+    graid_nol = get_guild_raid_stat(data, "Orphion's Nexus of Light")
+    graid_tcc = get_guild_raid_stat(data, 'The Canyon Colossus')
+    graid_tna = get_guild_raid_stat(data, 'The Nameless Anomaly')
+    graid_twp = get_guild_raid_stat(data, 'The Wartorn Palace')
+    damageTaken = get_raidstats_stat(data, 'damageTaken')
+    damageDealt = get_raidstats_stat(data, 'damageDealt')
+    healthHealed = get_raidstats_stat(data, 'healthHealed')
+    deaths = get_raidstats_stat(data, 'deaths')
+    buffsTaken = get_raidstats_stat(data, 'buffsTaken')
+    gambitsUsed = get_raidstats_stat(data, 'gambitsUsed')
 
     uuid = data.get("uuid")
 
@@ -138,18 +182,33 @@ async def build_profile_info(data, wynn_api, banner_renderer):
         "playtime": playtime,
         "wars": wars,
         "war_rank_display": war_rank_display,
+        "top_ranks": top_ranks,
         "quests": quests,
         "world_events": world_events,
         "total_level": total_level,
         "chests": chests,
+        "caves": caves,
         "pvp_kill": pvp_kill,
         "pvp_death": pvp_death,
         "notg": notg,
         "nol": nol,
         "tcc": tcc,
         "tna": tna,
+        "twp": twp,
+        "graid_notg": graid_notg,
+        "graid_nol": graid_nol,
+        "graid_tcc": graid_tcc,
+        "graid_tna": graid_tna,
+        "graid_twp": graid_twp,
+        "damageTaken": damageTaken,
+        "damageDealt": damageDealt,
+        "healthHealed": healthHealed,
+        "deaths": deaths,
+        "buffsTaken": buffsTaken,
+        "gambitsUsed": gambitsUsed,
         "dungeons": dungeons,
         "all_raids": all_raids,
+        "all_guild_raids": all_guild_raids,
         "uuid": uuid,
     }
     return profile_info
