@@ -381,25 +381,17 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     draw.text((x_hours - 3 - playtime_width, 690), playtime_text, font=font_mini, fill=(60,40,30,255))
 
     draw.text((70, 845), "Raid Completions", font=font_raids, fill=(90,60,30,255))
-    draw.text((70, 920), "Content", font=font_mini, fill=(60,40,30,255))
+    draw.text((70, 890), "Content", font=font_mini, fill=(60,40,30,255))
 
     raid_right_edge_x = 250
     graid_right_edge_x = 330
-    raid_keys = [("NOTG", "notg", "graid_notg", 950), ("NOL", "nol", "graid_nol", 1000), ("TCC", "tcc", "graid_tcc", 1050),
-                 ("TNA", "tna", "graid_tna", 1100), ("TWP", "twp", "graid_twp", 1150), ("All Raids", "all_raids", "all_guild_raids", 1200)]
-    graid_keys = [("graid_notg", 950), ("graid_nol", 1000), ("graid_tcc", 1050), ("graid_tna", 1100), ("graid_twp", 1150), ("all_guild_raids", 1200)]
+    raid_keys = [("NOTG", "notg", 940), ("NOL", "nol", 980), ("TCC", "tcc", 1020),
+                 ("TNA", "tna", 1060), ("TWP", "twp", 1100), ("Total", "all_raids", 1140)]
+    graid_keys = [("graid_notg", 940), ("graid_nol", 980), ("graid_tcc", 1020), ("graid_tna", 1060), ("graid_twp", 1100), ("all_guild_raids", 1140)]
 
-    for label, key, g_key, y in raid_keys:
+    for label, key, y in raid_keys:
         draw.text((70, y), label, font=font_mini, fill=(60,40,30,255))
-        
-        n_val = info.get(key, 0)
-        g_val = info.get(g_key, 0)
-        try:
-            val = max(0, int(n_val) - int(g_val))
-        except (ValueError, TypeError):
-            val = n_val
-            
-        num_text = fmt_num(val)
+        num_text = fmt_num(info.get(key, 0))
         bbox = draw.textbbox((0,0), num_text, font=font_mini)
         text_width = bbox[2] - bbox[0]
         x = raid_right_edge_x - text_width
@@ -414,9 +406,9 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
 
     top_ranks = info.get("top_ranks", [])
     if top_ranks:
-        rank_base_x = 680
+        rank_base_x = 660
         rank_base_y = 845
-        draw.text((rank_base_x, rank_base_y), "Top Ranks", font=font_small, fill=(90, 60, 30, 255))
+        draw.text((rank_base_x, rank_base_y), "Top Ranks", font=font_raids, fill=(90, 60, 30, 255))
         
         for i, rank_data in enumerate(top_ranks):
             y_pos = rank_base_y + 45 + (i * 35)
