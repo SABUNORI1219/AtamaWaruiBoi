@@ -174,11 +174,11 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
                 name_h = bbox_name[3] - bbox_name[1]
                 rank_paste_y = name_y + (name_h // 2) - (rank_h // 2)
                 img.paste(rank_rgba, (name_start_x, rank_paste_y), mask=rank_rgba)
-                name_start_x += rank_w + 10
+                name_start_x += rank_w + 20
         except Exception as e:
             logger.error(f"Rank image load failed: {e}")
 
-    draw.text((name_start_x, name_y), username, font=font_sub, fill=(60,40,30,255))
+    draw.text((name_start_x, name_y+10), username, font=font_sub, fill=(60,40,30,255))
 
     banner_bytes = info.get("banner_bytes")
     guild_banner_img = None
@@ -297,9 +297,9 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     active_char_info = info.get('active_char_info', 'Unknown')
     # 左側にステータス丸（オンライン：緑、オフライン：赤）を描画
     status_circle_x = 340
-    status_circle_y = 370 + 35
+    status_circle_y = 365 + 35
     text_x = status_circle_x + 45
-    text_y = 375
+    text_y = 370
     if not server_display.lower() == "offline":
         draw_status_circle(img, status_circle_x, status_circle_y, status="online")
     else:
@@ -311,7 +311,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     total_text = fmt_num(info.get('total_level', 0))
     bbox_lv = draw.textbbox((0, 0), "lv.", font=font_prefix)
     lv_width = bbox_lv[2] - bbox_lv[0]
-    x_lv = 345 - lv_width
+    x_lv = 350 - lv_width
     draw.text((x_lv, 565), "lv.", font=font_prefix, fill=(60,40,30,255))
     bbox_total = draw.textbbox((0, 0), total_text, font=font_mini)
     total_width = bbox_total[2] - bbox_total[0]
@@ -320,22 +320,22 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     draw.text((70, 590), "Dungeons:", font=font_mini, fill=(60,40,30,255))
     dun_text = fmt_num(info.get('dungeons', 0))
     bbox_dun = draw.textbbox((0, 0), dun_text, font=font_mini)
-    draw.text((345 - (bbox_dun[2] - bbox_dun[0]), 620), dun_text, font=font_mini, fill=(60,40,30,255))
+    draw.text((350 - (bbox_dun[2] - bbox_dun[0]), 620), dun_text, font=font_mini, fill=(60,40,30,255))
 
     draw.text((70, 660), "World Events:", font=font_mini, fill=(60,40,30,255))
     we_text = fmt_num(info.get('world_events', 0))
     bbox_we = draw.textbbox((0, 0), we_text, font=font_mini)
-    draw.text((345 - (bbox_we[2] - bbox_we[0]), 690), we_text, font=font_mini, fill=(60,40,30,255))
+    draw.text((350 - (bbox_we[2] - bbox_we[0]), 690), we_text, font=font_mini, fill=(60,40,30,255))
 
     draw.text((70, 730), "Caves:", font=font_mini, fill=(60,40,30,255))
     caves_text = fmt_num(info.get('caves', 0))
     bbox_caves = draw.textbbox((0, 0), caves_text, font=font_mini)
-    draw.text((345 - (bbox_caves[2] - bbox_caves[0]), 730), caves_text, font=font_mini, fill=(60,40,30,255))
+    draw.text((350 - (bbox_caves[2] - bbox_caves[0]), 730), caves_text, font=font_mini, fill=(60,40,30,255))
 
     draw.text((70, 770), "Quests:", font=font_mini, fill=(60,40,30,255))
     quests_text = fmt_num(info.get('quests', 0))
     bbox_quests = draw.textbbox((0, 0), quests_text, font=font_mini)
-    draw.text((345 - (bbox_quests[2] - bbox_quests[0]), 770), quests_text, font=font_mini, fill=(60,40,30,255))
+    draw.text((350 - (bbox_quests[2] - bbox_quests[0]), 770), quests_text, font=font_mini, fill=(60,40,30,255))
 
     draw.text((375, 520), "PvP Score:", font=font_mini, fill=(60,40,30,255))
     pk_text = fmt_num(info.get('pvp_kill', 0))
@@ -365,54 +365,66 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     draw.text((670 - (bbox_war_rank[2] - bbox_war_rank[0]), 770), war_rank_text, font=font_mini, fill=(60,40,30,255))
 
     draw.text((690, 520), "First Join:", font=font_mini, fill=(60,40,30,255))
-    draw.text((700, 550), f"{info.get('first_join', 'N/A')}", font=font_tiny, fill=(60,40,30,255))
+    draw.text((705, 555), f"{info.get('first_join', 'N/A')}", font=font_tiny, fill=(60,40,30,255))
 
     draw.text((690, 590), "Last Seen:", font=font_mini, fill=(60,40,30,255))
-    draw.text((700, 620), f"{info.get('last_join', 'N/A')}", font=font_tiny, fill=(60,40,30,255))
+    draw.text((705, 625), f"{info.get('last_join', 'N/A')}", font=font_tiny, fill=(60,40,30,255))
 
     draw.text((690, 660), "Playtime:", font=font_mini, fill=(60,40,30,255))
     playtime_text = fmt_num(info.get('playtime', 0))
     bbox_hours = draw.textbbox((0, 0), "hours", font=font_prefix)
     hours_width = bbox_hours[2] - bbox_hours[0]
-    x_hours = 1100 - hours_width
+    x_hours = 1000 - hours_width
     draw.text((x_hours, 705), "hours", font=font_prefix, fill=(60,40,30,255))
     bbox_playtime = draw.textbbox((0, 0), playtime_text, font=font_mini)
     playtime_width = bbox_playtime[2] - bbox_playtime[0]
     draw.text((x_hours - 3 - playtime_width, 690), playtime_text, font=font_mini, fill=(60,40,30,255))
 
-    draw.text((70, 840), "Content Clears", font=font_raids, fill=(90,60,30,255))
+    draw.text((70, 845), "Raid Completions", font=font_raids, fill=(90,60,30,255))
+    draw.text((70, 880), "Content", font=font_tiny, fill=(60,40,30,255))
 
-    right_edge_x = 440
-    raid_keys = [("NOTG", "notg", 1150), ("NOL", "nol", 1200), ("TCC", "tcc", 1250),
-                 ("TNA", "tna", 1300), ("All Raids", "all_raids", 1350)]
-    for label, key, y in raid_keys:
-        draw.text((100, y), label, font=font_raids, fill=(60,40,30,255))
-        num_text = fmt_num(info.get(key, 0))
-        bbox = draw.textbbox((0,0), num_text, font=font_raids)
+    raid_right_edge_x = 180
+    graid_right_edge_x = 300
+    raid_keys = [("NOTG", "notg", "graid_notg", 900), ("NOL", "nol", "graid_nol", 920), ("TCC", "tcc", "graid_tcc", 940),
+                 ("TNA", "tna", "graid_tna", 960), ("TWP", "twp", "graid_twp", 980), ("All Raids", "all_raids", "all_guild_raids", 1000)]
+    graid_keys = [("graid_notg", 900), ("graid_nol", 920), ("graid_tcc", 940), ("graid_tna", 960), ("graid_twp", 980), ("all_guild_raids", 1000)]
+
+    for label, key, g_key, y in raid_keys:
+        draw.text((70, y), label, font=font_tiny, fill=(60,40,30,255))
+        
+        n_val = info.get(key, 0)
+        g_val = info.get(g_key, 0)
+        try:
+            val = max(0, int(n_val) - int(g_val))
+        except (ValueError, TypeError):
+            val = n_val
+            
+        num_text = fmt_num(val)
+        bbox = draw.textbbox((0,0), num_text, font=font_tiny)
         text_width = bbox[2] - bbox[0]
-        x = right_edge_x - text_width
-        draw.text((x, y), num_text, font=font_raids, fill=(60,40,30,255))
+        x = raid_right_edge_x - text_width
+        draw.text((x, y), num_text, font=font_tiny, fill=(60,40,30,255))
 
-    wars_text = fmt_num(info.get('wars', 0))
-    war_rank_display_text = f"#{info.get('war_rank_display', 'N/A')}"
-    world_events_text = fmt_num(info.get('world_events', 0))
-    draw.text((475, 1150), "Wars", font=font_raids, fill=(60,40,30,255))
-    draw.text((475, 1200), "WEs", font=font_raids, fill=(60,40,30,255))
-    y_wars = 1150
-    y_world_events = 1200
-    x_right_align = 775
+    for key, y in graid_keys:
+        num_text = fmt_num(info.get(key, 0))
+        bbox = draw.textbbox((0,0), num_text, font=font_tiny)
+        text_width = bbox[2] - bbox[0]
+        x = graid_right_edge_x - text_width
+        draw.text((x, y), num_text, font=font_tiny, fill=(60,40,30,255))
 
-    bbox_wars = draw.textbbox((0,0), wars_text, font=font_raids)
-    wars_width = bbox_wars[2] - bbox_wars[0]
-    draw.text((x_right_align - wars_width, y_wars), wars_text, font=font_raids, fill=(60,40,30,255))
-
-    bbox_war_rank = draw.textbbox((0,0), war_rank_display_text, font=font_mini)
-    war_rank_width = bbox_war_rank[2] - bbox_war_rank[0]
-    draw.text((x_right_align + 12, y_wars + 12), war_rank_display_text, font=font_mini, fill=(60,40,30,255))
-
-    bbox_we = draw.textbbox((0,0), world_events_text, font=font_raids)
-    we_width = bbox_we[2] - bbox_we[0]
-    draw.text((x_right_align - we_width, y_world_events), world_events_text, font=font_raids, fill=(60,40,30,255))
+    top_ranks = info.get("top_ranks", [])
+    if top_ranks:
+        rank_base_x = 680
+        rank_base_y = 845
+        draw.text((rank_base_x, rank_base_y), "Top Ranks", font=font_small, fill=(90, 60, 30, 255))
+        
+        for i, rank_data in enumerate(top_ranks):
+            y_pos = rank_base_y + 45 + (i * 35)
+            draw.text((rank_base_x + 10, y_pos), rank_data["category"], font=font_mini, fill=(60, 40, 30, 255))
+            
+            rank_str = f"#{fmt_num(rank_data['rank'])}"
+            bbox = draw.textbbox((0,0), rank_str, font=font_mini)
+            draw.text((rank_base_x + 200 - (bbox[2] - bbox[0]), y_pos), rank_str, font=font_mini, fill=(60, 40, 30, 255))
 
     uuid = info.get("uuid", "")
     if uuid and '-' in uuid:
@@ -428,21 +440,6 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     draw.text((475, 1275), "UUID", font=font_raids, fill=(90,90,90,255))
     draw.text((600, 1280), line1 + "-", font=font_uuid, fill=(90,90,90,255))
     draw.text((475, 1320), line2, font=font_uuid, fill=(90,90,90,255))
-
-    # --- Top Ranks の描画 ---
-    top_ranks = info.get("top_ranks", [])
-    if top_ranks:
-        rank_base_x = 475
-        rank_base_y = 1000  # ← テンプレート画像に合わせて調整してください
-        draw.text((rank_base_x, rank_base_y), "Top Ranks", font=font_small, fill=(90, 60, 30, 255))
-        
-        for i, rank_data in enumerate(top_ranks):
-            y_pos = rank_base_y + 45 + (i * 35)
-            draw.text((rank_base_x + 10, y_pos), rank_data["category"], font=font_mini, fill=(60, 40, 30, 255))
-            
-            rank_str = f"#{fmt_num(rank_data['rank'])}"
-            bbox = draw.textbbox((0,0), rank_str, font=font_mini)
-            draw.text((x_right_align - (bbox[2] - bbox[0]), y_pos), rank_str, font=font_mini, fill=(60, 40, 30, 255))
 
     draw.text((635, 1400), "Generated by", font=font_mini, fill=(60,40,30,255))
     draw.text((735, 1435), "AtamaWaruiBoi#3244", font=font_mini, fill=(60,40,30,255))
