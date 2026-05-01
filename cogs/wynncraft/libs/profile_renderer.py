@@ -114,10 +114,10 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
         with Image.open(PLAYER_BACKGROUND_PATH) as bg_img:
             PLAYER_BACKGROUND = bg_img.convert("RGBA")
             # テンプレートの枠に合わせてサイズを強制的に変更する (幅, 高さ)
-            PLAYER_BACKGROUND = PLAYER_BACKGROUND.resize((220, 260), Image.LANCZOS)
+            PLAYER_BACKGROUND = PLAYER_BACKGROUND.resize((221, 255), Image.LANCZOS)
     except Exception as e:
         logger.error(f"PLAYER_BACKGROUND_PATH 読み込み失敗: {e}")
-        PLAYER_BACKGROUND = Image.new("RGBA", (220, 260), (200, 200, 200, 255))
+        PLAYER_BACKGROUND = Image.new("RGBA", (221, 255), (200, 200, 200, 255))
     try:
         with Image.open(RANK_STAR_PATH) as star_img:
             rank_star_img = star_img.convert("RGBA")
@@ -252,7 +252,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
                 
                 skin_x, skin_y, skin_w, skin_h = 106, 336, 196, 196
                 rank_paste_x = skin_x + (skin_w // 2) - (rank_w // 2)
-                rank_paste_y = skin_y + skin_h - 6
+                rank_paste_y = skin_y + skin_h - 50
                 
                 img.paste(rank_rgba, (rank_paste_x, rank_paste_y), mask=rank_rgba)
         except Exception as e:
@@ -295,65 +295,85 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     active_char_info = info.get('active_char_info', 'Unknown')
     # 左側にステータス丸（オンライン：緑、オフライン：赤）を描画
     status_circle_x = 340
-    status_circle_y = 380 + 35
+    status_circle_y = 365 + 35
     text_x = status_circle_x + 45
-    text_y = 380
+    text_y = 365
     if not server_display.lower() == "offline":
         draw_status_circle(img, status_circle_x, status_circle_y, status="online")
     else:
         draw_status_circle(img, status_circle_x, status_circle_y, status="offline")
     draw.text((text_x, text_y), f"{server_display}", font=font_main, fill=(60,40,30,255))
-    draw.text((340, text_y+50), f"Class: {active_char_info}", font=font_main, fill=(60,40,30,255))
+    draw.text((340, text_y+75), f"Class: {active_char_info}", font=font_main, fill=(60,40,30,255))
 
-    draw.text((75, 520), "First Join:", font=font_mini, fill=(60,40,30,255))
-    draw.text((85, 550), f"{info.get('first_join', 'N/A')}", font=font_mini, fill=(60,40,30,255))
+    draw.text((70, 520), "Total Level", font=font_mini, fill=(60,40,30,255))
+    total_text = fmt_num(info.get('total_level', 0))
+    bbox_total = draw.textbbox((0, 0), total_text, font=font_mini)
+    total_width = bbox_total[2] - bbox_total[0]
+    draw.text((340 - total_width, 520), total_text, font=font_mini, fill=(60,40,30,255))
+    draw.text((340 + 3, 520), "lv.", font=font_prefix, fill=(60,40,30,255))
 
-    draw.text((75, 600), "Last Seen:", font=font_mini, fill=(60,40,30,255))
-    draw.text((85, 630), f"{info.get('last_join', 'N/A')}", font=font_mini, fill=(60,40,30,255))
+    draw.text((70, 560), "Dungeons", font=font_sub, fill=(60,40,30,255))
+    dun_text = fmt_num(info.get('dungeons', 0))
+    bbox_dun = draw.textbbox((0, 0), dun_text, font=font_sub)
+    draw.text((340 - (bbox_dun[2] - bbox_dun[0]), 560), dun_text, font=font_sub, fill=(60,40,30,255))
 
-    draw.text((80, 680), "Playtime:", font=font_mini, fill=(60,40,30,255))
-    playtime_text = fmt_num(info.get('playtime', 0))
-    draw.text((100, 710), playtime_text, font=font_mini, fill=(60,40,30,255))
-    bbox = draw.textbbox((100, 710), playtime_text, font=font_mini)
-    x_hours = bbox[2] + 5
-    draw.text((x_hours, 710), "hours", font=font_mini, fill=(60,40,30,255))
+    draw.text((70, 600), "Caves", font=font_sub, fill=(60,40,30,255))
+    caves_text = fmt_num(info.get('caves', 0))
+    bbox_caves = draw.textbbox((0, 0), caves_text, font=font_sub)
+    draw.text((340 - (bbox_caves[2] - bbox_caves[0]), 600), caves_text, font=font_sub, fill=(60,40,30,255))
 
-    draw.text((90, 800), "Mobs", font=font_sub, fill=(60,40,30,255))
-    draw.text((330, 800), fmt_num(info.get('mobs_killed', 0)), font=font_sub, fill=(60,40,30,255))
+    draw.text((70, 640), "Quests", font=font_sub, fill=(60,40,30,255))
+    quests_text = fmt_num(info.get('quests', 0))
+    bbox_quests = draw.textbbox((0, 0), quests_text, font=font_sub)
+    draw.text((340 - (bbox_quests[2] - bbox_quests[0]), 640), quests_text, font=font_sub, fill=(60,40,30,255))
 
-    draw.text((90, 875), "Chests", font=font_sub, fill=(60,40,30,255))
-    draw.text((330, 875), fmt_num(info.get('chests', 0)), font=font_sub, fill=(60,40,30,255))
+    draw.text((70, 680), "World Events", font=font_sub, fill=(60,40,30,255))
+    we_text = fmt_num(info.get('world_events', 0))
+    bbox_we = draw.textbbox((0, 0), we_text, font=font_sub)
+    draw.text((340 - (bbox_we[2] - bbox_we[0]), 680), we_text, font=font_sub, fill=(60,40,30,255))
 
-    draw.text((90, 950), "Quests", font=font_sub, fill=(60,40,30,255))
-    draw.text((330, 950), fmt_num(info.get('quests', 0)), font=font_sub, fill=(60,40,30,255))
-
-    draw.text((90, 1000), "World Events", font=font_sub, fill=(60,40,30,255))
-    draw.text((330, 1000), fmt_num(info.get('world_events', 0)), font=font_sub, fill=(60,40,30,255))
-
-    draw.text((650, 750), "PvP", font=font_main, fill=(60,40,30,255))
+    draw.text((350, 520), "PvP", font=font_mini, fill=(60,40,30,255))
     pk_text = fmt_num(info.get('pvp_kill', 0))
     pd_text = fmt_num(info.get('pvp_death', 0))
-    draw.text((650, 825), pk_text, font=font_small, fill=(60,40,30,255))
-    bbox = draw.textbbox((650, 825), pk_text, font=font_small)
+    draw.text((350, 520), pk_text, font=font_mini, fill=(60,40,30,255))
+    bbox = draw.textbbox((350, 520), pk_text, font=font_prefix)
     x_k = bbox[2] + 3
-    draw.text((x_k, 825 + 18), "K", font=font_mini, fill=(60,40,30,255))
-    draw.text((650, 875), pd_text, font=font_small, fill=(60,40,30,255))
-    bbox = draw.textbbox((650, 875), pd_text, font=font_small)
+    draw.text((x_k, 520 + 18), "K", font=font_prefix, fill=(60,40,30,255))
+    draw.text((350, 520), pd_text, font=font_mini, fill=(60,40,30,255))
+    bbox = draw.textbbox((350, 520), pd_text, font=font_prefix)
     x_d = bbox[2] + 3
-    draw.text((x_d, 875 + 18), "D", font=font_mini, fill=(60,40,30,255))
+    draw.text((x_d, 520 + 18), "D", font=font_prefix, fill=(60,40,30,255))
 
-    draw.text((650, 950), "Total Level", font=font_main, fill=(60,40,30,255))
-    total_text = fmt_num(info.get('total_level', 0))
-    draw.text((650, 1025), total_text, font=font_small, fill=(60,40,30,255))
-    bbox = draw.textbbox((650, 1025), total_text, font=font_small)
-    x_lvl = bbox[2] + 3
-    draw.text((x_lvl, 1025 + 18), "lv.", font=font_mini, fill=(60,40,30,255))
+    draw.text((350, 560), "MobKill", font=font_mini, fill=(60,40,30,255))
+    draw.text((330, 560), fmt_num(info.get('mobs_killed', 0)), font=font_mini, fill=(60,40,30,255))
+
+    draw.text((350, 600), "ChestOpen", font=font_mini, fill=(60,40,30,255))
+    draw.text((330, 600), fmt_num(info.get('chests', 0)), font=font_mini, fill=(60,40,30,255))
+
+    draw.text((350, 640), "WarsDone", font=font_mini, fill=(60,40,30,255))
+    draw.text((330, 640), fmt_num(info.get('wars', 0)), font=font_mini, fill=(60,40,30,255))
+
+    draw.text((350, 680), "WarRank", font=font_mini, fill=(60,40,30,255))
+    draw.text((330, 680), fmt_num(info.get('war_rank_display', 0)), font=font_mini, fill=(60,40,30,255))
+
+    draw.text((700, 520), "First Join:", font=font_mini, fill=(60,40,30,255))
+    draw.text((700, 550), f"{info.get('first_join', 'N/A')}", font=font_mini, fill=(60,40,30,255))
+
+    draw.text((700, 590), "Last Seen:", font=font_mini, fill=(60,40,30,255))
+    draw.text((700, 620), f"{info.get('last_join', 'N/A')}", font=font_mini, fill=(60,40,30,255))
+
+    draw.text((700, 660), "Playtime:", font=font_mini, fill=(60,40,30,255))
+    playtime_text = fmt_num(info.get('playtime', 0))
+    draw.text((700, 690), playtime_text, font=font_mini, fill=(60,40,30,255))
+    bbox = draw.textbbox((700, 690), playtime_text, font=font_prefix)
+    x_hours = bbox[2] + 5
+    draw.text((x_hours, 690), "hours", font=font_prefix, fill=(60,40,30,255))
 
     draw.text((90, 1070), "Content Clears", font=font_small, fill=(90,60,30,255))
 
     right_edge_x = 440
     raid_keys = [("NOTG", "notg", 1150), ("NOL", "nol", 1200), ("TCC", "tcc", 1250),
-                 ("TNA", "tna", 1300), ("Dungeons", "dungeons", 1350), ("All Raids", "all_raids", 1400)]
+                 ("TNA", "tna", 1300), ("All Raids", "all_raids", 1350)]
     for label, key, y in raid_keys:
         draw.text((100, y), label, font=font_raids, fill=(60,40,30,255))
         num_text = fmt_num(info.get(key, 0))
