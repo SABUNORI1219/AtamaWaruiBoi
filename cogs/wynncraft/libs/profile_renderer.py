@@ -133,12 +133,11 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     try:
         font_title = ImageFont.truetype(FONT_PATH, 50)
         font_main = ImageFont.truetype(FONT_PATH, 45)
-        font_sub = ImageFont.truetype(FONT_PATH, 43)
         font_small = ImageFont.truetype(FONT_PATH, 40)
         font_raids = ImageFont.truetype(FONT_PATH, 35)
         font_uuid = ImageFont.truetype(FONT_PATH, 30)
         font_mini = ImageFont.truetype(FONT_PATH, 25)
-        font_tiny = ImageFont.truetype(FONT_PATH, 22)
+        font_tiny = ImageFont.truetype(FONT_PATH, 21)
         font_prefix = ImageFont.truetype(FONT_PATH, 12)
     except Exception as e:
         logger.error(f"FONT_PATH 読み込み失敗: {e}")
@@ -168,17 +167,17 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
             with Image.open(rank_img_path) as original_rank_img:
                 rank_rgba = original_rank_img.convert("RGBA")
                 orig_w, orig_h = rank_rgba.size
-                rank_w, rank_h = orig_w * 3, orig_h * 3
+                rank_w, rank_h = orig_w * 2, orig_h * 2
                 rank_rgba = rank_rgba.resize((rank_w, rank_h), Image.LANCZOS)
                 bbox_name = draw.textbbox((0, 0), username, font=font_title)
                 name_h = bbox_name[3] - bbox_name[1]
-                rank_paste_y = name_y + (name_h // 2) - (rank_h // 2) + 10
+                rank_paste_y = name_y + (name_h // 2) - (rank_h // 2)
                 img.paste(rank_rgba, (name_start_x, rank_paste_y), mask=rank_rgba)
                 name_start_x += rank_w + 10
         except Exception as e:
             logger.error(f"Rank image load failed: {e}")
 
-    draw.text((name_start_x, name_y), username, font=font_title, fill=(60,40,30,255))
+    draw.text((name_start_x, name_y), username, font=font_main, fill=(60,40,30,255))
 
     banner_bytes = info.get("banner_bytes")
     guild_banner_img = None
@@ -312,27 +311,27 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     bbox_total = draw.textbbox((0, 0), total_text, font=font_mini)
     total_width = bbox_total[2] - bbox_total[0]
     draw.text((340 - total_width, 550), total_text, font=font_mini, fill=(60,40,30,255))
-    draw.text((340 + 3, 570), "lv.", font=font_prefix, fill=(60,40,30,255))
+    draw.text((340 + 3, 565), "lv.", font=font_prefix, fill=(60,40,30,255))
 
-    draw.text((70, 580), "Dungeons:", font=font_mini, fill=(60,40,30,255))
+    draw.text((70, 590), "Dungeons:", font=font_mini, fill=(60,40,30,255))
     dun_text = fmt_num(info.get('dungeons', 0))
     bbox_dun = draw.textbbox((0, 0), dun_text, font=font_mini)
-    draw.text((340 - (bbox_dun[2] - bbox_dun[0]), 610), dun_text, font=font_mini, fill=(60,40,30,255))
+    draw.text((340 - (bbox_dun[2] - bbox_dun[0]), 620), dun_text, font=font_mini, fill=(60,40,30,255))
 
-    draw.text((70, 640), "Caves:", font=font_mini, fill=(60,40,30,255))
-    caves_text = fmt_num(info.get('caves', 0))
-    bbox_caves = draw.textbbox((0, 0), caves_text, font=font_mini)
-    draw.text((340 - (bbox_caves[2] - bbox_caves[0]), 670), caves_text, font=font_mini, fill=(60,40,30,255))
-
-    draw.text((70, 700), "Quests:", font=font_mini, fill=(60,40,30,255))
-    quests_text = fmt_num(info.get('quests', 0))
-    bbox_quests = draw.textbbox((0, 0), quests_text, font=font_mini)
-    draw.text((340 - (bbox_quests[2] - bbox_quests[0]), 730), quests_text, font=font_mini, fill=(60,40,30,255))
-
-    draw.text((70, 760), "World Events:", font=font_mini, fill=(60,40,30,255))
+    draw.text((70, 660), "World Events:", font=font_mini, fill=(60,40,30,255))
     we_text = fmt_num(info.get('world_events', 0))
     bbox_we = draw.textbbox((0, 0), we_text, font=font_mini)
-    draw.text((340 - (bbox_we[2] - bbox_we[0]), 790), we_text, font=font_mini, fill=(60,40,30,255))
+    draw.text((340 - (bbox_we[2] - bbox_we[0]), 690), we_text, font=font_mini, fill=(60,40,30,255))
+
+    draw.text((70, 730), "Caves:", font=font_mini, fill=(60,40,30,255))
+    caves_text = fmt_num(info.get('caves', 0))
+    bbox_caves = draw.textbbox((0, 0), caves_text, font=font_mini)
+    draw.text((340 - (bbox_caves[2] - bbox_caves[0]), 730), caves_text, font=font_mini, fill=(60,40,30,255))
+
+    draw.text((70, 770), "Quests:", font=font_mini, fill=(60,40,30,255))
+    quests_text = fmt_num(info.get('quests', 0))
+    bbox_quests = draw.textbbox((0, 0), quests_text, font=font_mini)
+    draw.text((340 - (bbox_quests[2] - bbox_quests[0]), 770), quests_text, font=font_mini, fill=(60,40,30,255))
 
     draw.text((375, 520), "PvP Score:", font=font_mini, fill=(60,40,30,255))
     pk_text = fmt_num(info.get('pvp_kill', 0))
@@ -341,25 +340,25 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     bbox_pvp = draw.textbbox((0, 0), pvp_val_text, font=font_mini)
     draw.text((670 - (bbox_pvp[2] - bbox_pvp[0]), 550), pvp_val_text, font=font_mini, fill=(60,40,30,255))
 
-    draw.text((375, 580), "Mobs Killed:", font=font_mini, fill=(60,40,30,255))
+    draw.text((375, 590), "Mobs Killed:", font=font_mini, fill=(60,40,30,255))
     mob_text = fmt_num(info.get('mobs_killed', 0))
     bbox_mob = draw.textbbox((0, 0), mob_text, font=font_mini)
-    draw.text((670 - (bbox_mob[2] - bbox_mob[0]), 610), mob_text, font=font_mini, fill=(60,40,30,255))
+    draw.text((670 - (bbox_mob[2] - bbox_mob[0]), 620), mob_text, font=font_mini, fill=(60,40,30,255))
 
-    draw.text((375, 640), "Chests Opened:", font=font_mini, fill=(60,40,30,255))
+    draw.text((375, 660), "Chests Opened:", font=font_mini, fill=(60,40,30,255))
     chest_text = fmt_num(info.get('chests', 0))
     bbox_chest = draw.textbbox((0, 0), chest_text, font=font_mini)
-    draw.text((670 - (bbox_chest[2] - bbox_chest[0]), 670), chest_text, font=font_mini, fill=(60,40,30,255))
+    draw.text((670 - (bbox_chest[2] - bbox_chest[0]), 690), chest_text, font=font_mini, fill=(60,40,30,255))
 
-    draw.text((375, 700), "Wars Done:", font=font_mini, fill=(60,40,30,255))
+    draw.text((375, 730), "Wars Done:", font=font_mini, fill=(60,40,30,255))
     wars_done_text = fmt_num(info.get('wars', 0))
     bbox_wars_done = draw.textbbox((0, 0), wars_done_text, font=font_mini)
     draw.text((670 - (bbox_wars_done[2] - bbox_wars_done[0]), 730), wars_done_text, font=font_mini, fill=(60,40,30,255))
 
-    draw.text((375, 760), "War Rank:", font=font_mini, fill=(60,40,30,255))
+    draw.text((375, 770), "War Rank:", font=font_mini, fill=(60,40,30,255))
     war_rank_text = f"#{info.get('war_rank_display', 'N/A')}"
     bbox_war_rank = draw.textbbox((0, 0), war_rank_text, font=font_mini)
-    draw.text((670 - (bbox_war_rank[2] - bbox_war_rank[0]), 790), war_rank_text, font=font_mini, fill=(60,40,30,255))
+    draw.text((670 - (bbox_war_rank[2] - bbox_war_rank[0]), 770), war_rank_text, font=font_mini, fill=(60,40,30,255))
 
     draw.text((690, 520), "First Join:", font=font_mini, fill=(60,40,30,255))
     draw.text((695, 550), f"{info.get('first_join', 'N/A')}", font=font_tiny, fill=(60,40,30,255))
@@ -369,12 +368,15 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
 
     draw.text((690, 660), "Playtime:", font=font_mini, fill=(60,40,30,255))
     playtime_text = fmt_num(info.get('playtime', 0))
-    draw.text((750, 690), playtime_text, font=font_mini, fill=(60,40,30,255))
-    bbox = draw.textbbox((750, 690), playtime_text, font=font_mini)
-    x_hours = bbox[2] + 5
-    draw.text((x_hours, 710), "hours", font=font_prefix, fill=(60,40,30,255))
+    bbox_hours = draw.textbbox((0, 0), "hours", font=font_prefix)
+    hours_width = bbox_hours[2] - bbox_hours[0]
+    x_hours = 900 - hours_width
+    draw.text((x_hours, 705), "hours", font=font_prefix, fill=(60,40,30,255))
+    bbox_playtime = draw.textbbox((0, 0), playtime_text, font=font_mini)
+    playtime_width = bbox_playtime[2] - bbox_playtime[0]
+    draw.text((x_hours - 3 - playtime_width, 690), playtime_text, font=font_mini, fill=(60,40,30,255))
 
-    draw.text((70, 830), "Content Clears", font=font_small, fill=(90,60,30,255))
+    draw.text((70, 850), "Content Clears", font=font_small, fill=(90,60,30,255))
 
     right_edge_x = 440
     raid_keys = [("NOTG", "notg", 1150), ("NOL", "nol", 1200), ("TCC", "tcc", 1250),
