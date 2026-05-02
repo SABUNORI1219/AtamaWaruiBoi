@@ -406,15 +406,15 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     raid_stat_y = 900
     draw.text((70, 845), "Raid Completions", font=font_raids, fill=(90,60,30,255))
     draw.text((70, raid_stat_y), "Content", font=font_mini, fill=(60,40,30,255))
-    draw.text((235, raid_stat_y), "Total", font=font_mini, fill=(60,40,30,255))
+    draw.text((240, raid_stat_y), "Total", font=font_mini, fill=(60,40,30,255))
     draw.text((350, raid_stat_y), "Rank", font=font_mini, fill=(60,40,30,255))
     draw.text((440, raid_stat_y), "Normal", font=font_mini, fill=(60,40,30,255))
     draw.text((560, raid_stat_y), "Guild", font=font_mini, fill=(60,40,30,255))
 
-    total_right_edge_x = 300
+    total_right_edge_x = 315
     rank_right_edge_x = 420
     normal_left_x = 440
-    graid_right_edge_x = 590
+    graid_right_edge_x = 610
 
     raid_keys = [
         ("NOTG", "notg", "graid_notg", 'notg_rank_display', 938),
@@ -448,7 +448,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
             
             bbox = draw.textbbox((0, 0), rank_text, font=font_mini)
             r_w = bbox[2] - bbox[0]
-            draw.text((rank_right_edge_x - r_w, y), rank_text, font=font_mini, fill=(60,40,30,255))
+            draw.text((rank_right_edge_x - r_w, y), rank_text, font=font_tiny, fill=(60,40,30,255))
             
         try:
             n_val = max(0, int(t_val) - int(g_val))
@@ -471,9 +471,9 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
         ("Damage Dealt", info.get("damageDealt", 0), 660, 885),
         ("Damage Taken", info.get("damageTaken", 0), 660, 925),
         ("Health Healed", info.get("healthHealed", 0), 660, 965),
-        ("Deaths", info.get("deaths", 0), 900, 885),
-        ("Buffs Taken", info.get("buffsTaken", 0), 900, 925),
-        ("Gambits Used", info.get("gambitsUsed", 0), 900, 965),
+        ("Deaths", info.get("deaths", 0), 660, 1005),
+        ("Buffs Taken", info.get("buffsTaken", 0), 660, 1045),
+        ("Gambits Used", info.get("gambitsUsed", 0), 660, 1085),
     ]
 
     for label, val, x, y in raid_stats_list:
@@ -481,7 +481,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
         val_str = fmt_short(val)
         bbox = draw.textbbox((0, 0), val_str, font=font_mini)
         val_w = bbox[2] - bbox[0]
-        draw.text((x + 180 - val_w, y), val_str, font=font_mini, fill=(60,40,30,255))
+        draw.text((x + 300 - val_w, y), val_str, font=font_mini, fill=(60,40,30,255))
 
     top_ranks = info.get("top_ranks", [])
     if top_ranks:
