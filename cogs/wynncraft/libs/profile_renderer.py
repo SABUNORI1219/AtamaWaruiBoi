@@ -406,15 +406,15 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     raid_stat_y = 900
     draw.text((70, 845), "Raid Completions", font=font_raids, fill=(90,60,30,255))
     draw.text((70, raid_stat_y), "Content", font=font_mini, fill=(60,40,30,255))
-    draw.text((240, raid_stat_y), "Total", font=font_mini, fill=(60,40,30,255))
+    draw.text((245, raid_stat_y), "Total", font=font_mini, fill=(60,40,30,255))
     draw.text((350, raid_stat_y), "Rank", font=font_mini, fill=(60,40,30,255))
     draw.text((440, raid_stat_y), "Normal", font=font_mini, fill=(60,40,30,255))
     draw.text((560, raid_stat_y), "Guild", font=font_mini, fill=(60,40,30,255))
 
-    total_right_edge_x = 315
-    rank_right_edge_x = 420
+    total_right_edge_x = 320
+    rank_right_edge_x = 430
     normal_left_x = 440
-    graid_right_edge_x = 610
+    graid_right_edge_x = 620
 
     raid_keys = [
         ("NOTG", "notg", "graid_notg", 'notg_rank_display', 938),
@@ -448,7 +448,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
             
             bbox = draw.textbbox((0, 0), rank_text, font=font_mini)
             r_w = bbox[2] - bbox[0]
-            draw.text((rank_right_edge_x - r_w, y), rank_text, font=font_tiny, fill=(60,40,30,255))
+            draw.text((rank_right_edge_x - r_w, y+2), rank_text, font=font_tiny, fill=(60,40,30,255))
             
         try:
             n_val = max(0, int(t_val) - int(g_val))
@@ -464,7 +464,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
         draw.text((graid_right_edge_x - g_w, y), g_text, font=font_mini, fill=(60,40,30,255))
 
     
-    raid_stats_y = 845
+    raid_stats_y = 840
     draw.text((660, raid_stats_y), "Raid Stats", font=font_raids, fill=(90,60,30,255))
     
     raid_stats_list = [
@@ -481,12 +481,12 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
         val_str = fmt_short(val)
         bbox = draw.textbbox((0, 0), val_str, font=font_mini)
         val_w = bbox[2] - bbox[0]
-        draw.text((x + 300 - val_w, y), val_str, font=font_mini, fill=(60,40,30,255))
+        draw.text((x + 310 - val_w, y), val_str, font=font_mini, fill=(60,40,30,255))
 
     top_ranks = info.get("top_ranks", [])
     if top_ranks:
-        rank_base_x = 480
-        rank_base_y = 1190
+        rank_base_x = 70
+        rank_base_y = 1180
         draw.text((rank_base_x, rank_base_y), "Top Ranks", font=font_raids, fill=(90, 60, 30, 255))
         
         for i, rank_data in enumerate(top_ranks):
@@ -495,7 +495,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
             
             rank_str = f"#{fmt_num(rank_data['rank'])}"
             bbox = draw.textbbox((0,0), rank_str, font=font_mini)
-            draw.text((rank_base_x + 220 - (bbox[2] - bbox[0]), y_pos), rank_str, font=font_mini, fill=(60, 40, 30, 255))
+            draw.text((rank_base_x + 300 - (bbox[2] - bbox[0]), y_pos), rank_str, font=font_mini, fill=(60, 40, 30, 255))
 
     uuid = info.get("uuid", "")
     if uuid and '-' in uuid:
