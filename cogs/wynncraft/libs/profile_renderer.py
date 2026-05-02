@@ -406,75 +406,62 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     raid_stat_y = 900
     draw.text((70, 845), "Raid Completions", font=font_raids, fill=(90,60,30,255))
     draw.text((70, raid_stat_y), "Content", font=font_mini, fill=(60,40,30,255))
-    draw.text((235, raid_stat_y), "Normal", font=font_mini, fill=(60,40,30,255))
-    draw.text((350, raid_stat_y), "Guild", font=font_mini, fill=(60,40,30,255))
-    draw.text((440, raid_stat_y), "Total", font=font_mini, fill=(60,40,30,255))
-    draw.text((550, raid_stat_y), "Rank", font=font_mini, fill=(60,40,30,255))
+    draw.text((235, raid_stat_y), "Total", font=font_mini, fill=(60,40,30,255))
+    draw.text((350, raid_stat_y), "Rank", font=font_mini, fill=(60,40,30,255))
+    draw.text((440, raid_stat_y), "Normal", font=font_mini, fill=(60,40,30,255))
+    draw.text((560, raid_stat_y), "Guild", font=font_mini, fill=(60,40,30,255))
 
-    raid_right_edge_x = 300
-    graid_right_edge_x = 420
-    raid_keys = [("NOTG", "notg", "graid_notg", 938), ("NOL", "nol", "graid_nol", 977), ("TCC", "tcc", "graid_tcc", 1016),
-                 ("TNA", "tna", "graid_tna", 1055), ("TWP", "twp", "graid_twp", 1094), ("Total", "all_raids", "all_guild_raids", 1133)]
-    graid_keys = [("graid_notg", 938), ("graid_nol", 977), ("graid_tcc", 1016), ("graid_tna", 1055), ("graid_twp", 1094), ("all_guild_raids", 1133)]
+    total_right_edge_x = 300
+    rank_right_edge_x = 420
+    normal_left_x = 440
+    graid_right_edge_x = 590
 
-    for label, key, g_key, y in raid_keys:
+    raid_keys = [
+        ("NOTG", "notg", "graid_notg", 'notg_rank_display', 938),
+        ("NOL", "nol", "graid_nol", 'nol_rank_display', 977),
+        ("TCC", "tcc", "graid_tcc", 'tcc_rank_display', 1016),
+        ("TNA", "tna", "graid_tna", 'tna_rank_display', 1055),
+        ("TWP", "twp", "graid_twp", 'twp_rank_display', 1094),
+        ("Total", "all_raids", "all_guild_raids", None, 1133)
+    ]
+
+    for label, t_key, g_key, r_key, y in raid_keys:
         draw.text((70, y), label, font=font_mini, fill=(60,40,30,255))
         
-        n_val = info.get(key, 0)
+        t_val = info.get(t_key, 0)
         g_val = info.get(g_key, 0)
+        
+        t_text = fmt_num(t_val)
+        bbox = draw.textbbox((0,0), t_text, font=font_mini)
+        t_w = bbox[2] - bbox[0]
+        draw.text((total_right_edge_x - t_w, y), t_text, font=font_mini, fill=(60,40,30,255))
+        
+        if r_key:
+            rank_val = info.get(r_key, 'N/A')
+            if rank_val not in ("N/A", "非公開", None):
+                try:
+                    rank_text = f"#{fmt_num(int(rank_val))}"
+                except (ValueError, TypeError):
+                    rank_text = f"#{rank_val}"
+            else:
+                rank_text = str(rank_val) if rank_val else "N/A"
+            
+            bbox = draw.textbbox((0, 0), rank_text, font=font_mini)
+            r_w = bbox[2] - bbox[0]
+            draw.text((rank_right_edge_x - r_w, y), rank_text, font=font_mini, fill=(60,40,30,255))
+            
         try:
-            val = max(0, int(n_val) - int(g_val))
+            n_val = max(0, int(t_val) - int(g_val))
         except (ValueError, TypeError):
-            val = n_val
+            n_val = t_val
             
-        num_text = fmt_num(val)
-        bbox = draw.textbbox((0,0), num_text, font=font_mini)
-        text_width = bbox[2] - bbox[0]
-        x = raid_right_edge_x - text_width
-        draw.text((x, y), num_text, font=font_mini, fill=(60,40,30,255))
+        n_text = fmt_num(n_val)
+        draw.text((normal_left_x, y), n_text, font=font_mini, fill=(60,40,30,255))
 
-    for key, y in graid_keys:
-        num_text = fmt_num(info.get(key, 0))
-        bbox = draw.textbbox((0,0), num_text, font=font_mini)
-        text_width = bbox[2] - bbox[0]
-        x = graid_right_edge_x - text_width
-        draw.text((x, y), num_text, font=font_mini, fill=(60,40,30,255))
-
-    total_raids_x = 440
-    notg_text = fmt_num(info.get('notg', 0))
-    nol_text = fmt_num(info.get('nol', 0))
-    tcc_text = fmt_num(info.get('tcc', 0))
-    tna_text = fmt_num(info.get('tna', 0))
-    twp_text = fmt_num(info.get('twp', 0))
-    total_text = fmt_num(info.get('all_raids', 0))
-    draw.text((total_raids_x, 938), notg_text, font=font_mini, fill=(60,40,30,255))
-    draw.text((total_raids_x, 977), nol_text, font=font_mini, fill=(60,40,30,255))
-    draw.text((total_raids_x, 1016), tcc_text, font=font_mini, fill=(60,40,30,255))
-    draw.text((total_raids_x, 1055), tna_text, font=font_mini, fill=(60,40,30,255))
-    draw.text((total_raids_x, 1094), twp_text, font=font_mini, fill=(60,40,30,255))
-    draw.text((total_raids_x, 1133), total_text, font=font_mini, fill=(60,40,30,255))
-
-    raid_ranks = [
-        (info.get('notg_rank_display', 'N/A'), 938),
-        (info.get('nol_rank_display', 'N/A'), 977),
-        (info.get('tcc_rank_display', 'N/A'), 1016),
-        (info.get('tna_rank_display', 'N/A'), 1055),
-        (info.get('twp_rank_display', 'N/A'), 1094)
-    ]
-    rank_right_edge_x = 650
-    for rank_val, y in raid_ranks:
-        if rank_val not in ("N/A", "非公開", None):
-            try:
-                rank_text = f"#{fmt_num(int(rank_val))}"
-            except (ValueError, TypeError):
-                rank_text = f"#{rank_val}"
-        else:
-            rank_text = str(rank_val) if rank_val else "N/A"
-            
-        bbox = draw.textbbox((0, 0), rank_text, font=font_mini)
-        text_width = bbox[2] - bbox[0]
-        x = rank_right_edge_x - text_width
-        draw.text((x, y), rank_text, font=font_mini, fill=(60,40,30,255))
+        g_text = fmt_num(g_val)
+        bbox = draw.textbbox((0,0), g_text, font=font_mini)
+        g_w = bbox[2] - bbox[0]
+        draw.text((graid_right_edge_x - g_w, y), g_text, font=font_mini, fill=(60,40,30,255))
 
     
     raid_stats_y = 845
