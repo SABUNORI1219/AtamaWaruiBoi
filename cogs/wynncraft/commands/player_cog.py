@@ -197,6 +197,28 @@ async def build_profile_info(data, wynn_api, banner_renderer):
 
     uuid = data.get("uuid")
 
+    characters = safe_get(data, ['characters'], {})
+    logins_list = []
+    if isinstance(characters, dict):
+        for char_uuid, char_data in characters.items():
+            if isinstance(char_data, dict):
+                char_type = char_data.get('type', 'Unknown')
+                reskin = char_data.get('reskin')
+                
+                raw_name = reskin if reskin and reskin != "N/A" else char_type
+                char_name = raw_name.title() if isinstance(raw_name, str) else "Unknown"
+                
+                level = char_data.get('level', 0)
+                logins = char_data.get('logins', 0)
+                
+                logins_list.append({
+                    "class_name": f"{char_name} (Lv.{level})",
+                    "logins": logins
+                })
+    
+    logins_list.sort(key=lambda x: x['logins'], reverse=True)
+    top_logins = logins_list[:3]
+
     profile_info = {
         "username": data.get("username"),
         "support_rank": support_rank,
@@ -218,6 +240,7 @@ async def build_profile_info(data, wynn_api, banner_renderer):
         "tna_rank_display": tna_rank_display,
         "twp_rank_display": twp_rank_display,
         "top_ranks": top_ranks,
+        "top_logins": top_logins,
         "quests": quests,
         "world_events": world_events,
         "total_level": total_level,

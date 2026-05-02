@@ -500,6 +500,22 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     else:
         draw.text((rank_base_x, rank_base_y + 45), "API Hidden", font=font_uuid, fill=(60, 40, 30, 255))
 
+    top_logins = info.get("top_logins", [])
+    login_base_x = 380
+    login_base_y = 1180
+    draw.text((login_base_x, login_base_y), "Most Logined Classes", font=font_uuid, fill=(90, 60, 30, 255))
+    
+    if top_logins:
+        for i, login_data in enumerate(top_logins):
+            y_pos = login_base_y + 45 + (i * 55)
+            draw.text((login_base_x, y_pos), f"{login_data['class_name']}:", font=font_tiny, fill=(60, 40, 30, 255))
+            
+            login_str = f"{fmt_num(login_data['logins'])}"
+            bbox = draw.textbbox((0,0), login_str, font=font_tiny)
+            draw.text((660 - (bbox[2] - bbox[0]), y_pos + 40), login_str, font=font_tiny, fill=(60, 40, 30, 255))
+    else:
+        draw.text((login_base_x, login_base_y + 45), "API Hidden", font=font_uuid, fill=(60, 40, 30, 255))
+
     uuid = info.get("uuid", "")
     if uuid and '-' in uuid:
         parts = uuid.split('-')
