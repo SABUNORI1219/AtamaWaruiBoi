@@ -377,7 +377,14 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     draw.text((670 - (bbox_wars_done[2] - bbox_wars_done[0]), 730), wars_done_text, font=font_mini, fill=(60,40,30,255))
 
     draw.text((375, 770), "War Rank:", font=font_mini, fill=(60,40,30,255))
-    war_rank_text = f"#{info.get('war_rank_display', 'N/A')}"
+    war_rank_val = info.get('war_rank_display', 'N/A')
+    if war_rank_val not in ("N/A", "非公開", None):
+        try:
+            war_rank_text = f"#{fmt_num(int(war_rank_val))}"
+        except (ValueError, TypeError):
+            war_rank_text = f"#{war_rank_val}"
+    else:
+        war_rank_text = str(war_rank_val) if war_rank_val else "N/A"
     bbox_war_rank = draw.textbbox((0, 0), war_rank_text, font=font_mini)
     draw.text((670 - (bbox_war_rank[2] - bbox_war_rank[0]), 770), war_rank_text, font=font_mini, fill=(60,40,30,255))
 
@@ -503,18 +510,18 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     login_base_x = 370
     login_base_y = 1185
     draw.text((login_base_x, login_base_y), "Most Logined", font=font_uuid, fill=(90, 60, 30, 255))
-    draw.text((login_base_x+145, login_base_y+40), "Classes", font=font_uuid, fill=(90, 60, 30, 255))
+    draw.text((login_base_x+150, login_base_y+40), "Classes", font=font_uuid, fill=(90, 60, 30, 255))
     
     if top_logins:
         for i, login_data in enumerate(top_logins):
-            y_pos = login_base_y + 95 + (i * 70)
+            y_pos = login_base_y + 90 + (i * 70)
             draw.text((login_base_x+5, y_pos), f"{login_data['class_name']}:", font=font_tiny, fill=(60, 40, 30, 255))
             
             login_str = f"{fmt_num(login_data['logins'])}"
             bbox = draw.textbbox((0,0), login_str, font=font_tiny)
             draw.text((675 - (bbox[2] - bbox[0]), y_pos + 30), login_str, font=font_tiny, fill=(60, 40, 30, 255))
     else:
-        draw.text((login_base_x, login_base_y + 45), "API Hidden", font=font_uuid, fill=(60, 40, 30, 255))
+        draw.text((login_base_x, login_base_y + 75), "API Hidden", font=font_uuid, fill=(60, 40, 30, 255))
 
     uuid = info.get("uuid", "")
     if uuid and '-' in uuid:
