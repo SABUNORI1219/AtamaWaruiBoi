@@ -371,7 +371,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     bbox_chest = draw.textbbox((0, 0), chest_text, font=font_mini)
     draw.text((670 - (bbox_chest[2] - bbox_chest[0]), 690), chest_text, font=font_mini, fill=(60,40,30,255))
 
-    draw.text((375, 730), "Wars Done:", font=font_mini, fill=(60,40,30,255))
+    draw.text((375, 730), "Wars Won:", font=font_mini, fill=(60,40,30,255))
     wars_done_text = fmt_num(info.get('wars', 0))
     bbox_wars_done = draw.textbbox((0, 0), wars_done_text, font=font_mini)
     draw.text((670 - (bbox_wars_done[2] - bbox_wars_done[0]), 730), wars_done_text, font=font_mini, fill=(60,40,30,255))
