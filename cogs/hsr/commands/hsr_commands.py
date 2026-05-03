@@ -33,6 +33,8 @@ class HSRCommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
+    @app_commands.allowed_installs(guilds=True, users=False)
+    @app_commands.allowed_contexts(guilds=True, dms=False, private_channels=False)
     @app_commands.command(name="hsr", description="崩壊：スターレイルのゲーム内ステータスを表示します")
     async def hsr_status(self, interaction: discord.Interaction):
         await interaction.response.defer()
