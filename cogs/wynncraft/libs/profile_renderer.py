@@ -510,7 +510,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
     login_base_x = 370
     login_base_y = 1185
     draw.text((login_base_x, login_base_y), "Most Logined", font=font_uuid, fill=(90, 60, 30, 255))
-    draw.text((login_base_x+150, login_base_y+40), "Classes", font=font_uuid, fill=(90, 60, 30, 255))
+    draw.text((login_base_x+155, login_base_y+40), "Classes", font=font_uuid, fill=(90, 60, 30, 255))
     
     if top_logins:
         for i, login_data in enumerate(top_logins):
