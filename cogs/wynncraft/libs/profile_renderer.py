@@ -278,7 +278,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
             logger.error(f"Unknown skin image load failed: {ee}")
 
     text_base_x = banner_x + banner_size[0] + 10
-    guild_name_lines = split_guild_name_by_pixel_and_word(guild_name_display, font_main, text_base_x, 1000, draw)
+    guild_name_lines = split_guild_name_by_pixel_and_word(guild_name_display, font_main, text_base_x, 975, draw)
     if len(guild_name_lines) == 1:
         draw.text((text_base_x, banner_y), guild_name_lines[0], font=font_main, fill=(60,40,30,255))
     else:
@@ -501,13 +501,13 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
 
     top_logins = info.get("top_logins", [])
     login_base_x = 370
-    login_base_y = 1180
+    login_base_y = 1185
     draw.text((login_base_x, login_base_y), "Most Logined", font=font_uuid, fill=(90, 60, 30, 255))
-    draw.text((login_base_x+140, login_base_y+40), "Classes", font=font_uuid, fill=(90, 60, 30, 255))
+    draw.text((login_base_x+145, login_base_y+40), "Classes", font=font_uuid, fill=(90, 60, 30, 255))
     
     if top_logins:
         for i, login_data in enumerate(top_logins):
-            y_pos = login_base_y + 90 + (i * 70)
+            y_pos = login_base_y + 95 + (i * 70)
             draw.text((login_base_x+5, y_pos), f"{login_data['class_name']}:", font=font_tiny, fill=(60, 40, 30, 255))
             
             login_str = f"{fmt_num(login_data['logins'])}"
@@ -529,7 +529,7 @@ def generate_profile_card(info, output_path="profile_card.png", skin_image=None)
             line3 = ""
     else:
         line1 = line2 = ""
-    draw.text((690, 1200), "UUID", font=font_uuid, fill=(90,90,90,255))
+    draw.text((690, 1185), "UUID", font=font_uuid, fill=(90,90,90,255))
     draw.text((690, 1230), line1 + "-", font=font_tiny, fill=(90,90,90,255))
     draw.text((690, 1260), line2, font=font_tiny, fill=(90,90,90,255))
     draw.text((690, 1290), line3, font=font_tiny, fill=(90,90,90,255))
