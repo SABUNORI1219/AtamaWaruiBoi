@@ -54,8 +54,13 @@ class GuildWarTracker(commands.Cog):
             logger.error("TURSO_DATABASE_URL / TURSO_AUTH_TOKEN が未設定です。war_tracker を無効化します。")
             return
 
+        db_url = TURSO_DATABASE_URL
+        # WebSocket接続(libsql/wss)が環境によって失敗する場合、HTTPSにフォールバックさせる
+        if db_url and db_url.startswith("libsql://"):
+            db_url = "https://" + db_url[len("libsql://"):]
+
         self.db = libsql_client.create_client(
-            url=TURSO_DATABASE_URL,
+            url=db_url,
             auth_token=TURSO_AUTH_TOKEN,
         )
         await self._setup_db()
