@@ -286,14 +286,19 @@ class GuildWarTracker(commands.Cog):
             f" at {acquired_at_str}"
         )
 
+        # territory_cache は既にこの奪取を反映して更新済みなので、
+        # そのまま集計すれば「変更があった時点での」領地数になる
+        old_tc = sum(1 for v in self.territory_cache.values() if v['guild_name'] == old_guild_name)
+        new_tc = sum(1 for v in self.territory_cache.values() if v['guild_name'] == new_guild_name)
+
         # Guild API は「新しく取得したギルド」に対してのみ 1 回実行
         guild_data = await self.api.get_guild_by_name(new_guild_name)
         if not guild_data:
             logger.warning(f"ギルドデータ取得失敗: {new_guild_name!r}")
             await self._send_notification(
                 territory_name,
-                old_guild_name, old_guild_prefix,
-                new_guild_name, new_guild_prefix,
+                old_guild_name, old_guild_prefix, old_tc,
+                new_guild_name, new_guild_prefix, new_tc,
                 acquired_at, war_world=None, participants=[], duration_seconds=None,
             )
             return
@@ -311,8 +316,8 @@ class GuildWarTracker(commands.Cog):
             logger.warning(f"メンバーが見つかりません: {new_guild_name!r}")
             await self._send_notification(
                 territory_name,
-                old_guild_name, old_guild_prefix,
-                new_guild_name, new_guild_prefix,
+                old_guild_name, old_guild_prefix, old_tc,
+                new_guild_name, new_guild_prefix, new_tc,
                 acquired_at, war_world=None, participants=[], duration_seconds=None,
             )
             return
@@ -336,8 +341,8 @@ class GuildWarTracker(commands.Cog):
             logger.warning(f"ウォーワールドを特定できませんでした: {territory_name!r}")
             await self._send_notification(
                 territory_name,
-                old_guild_name, old_guild_prefix,
-                new_guild_name, new_guild_prefix,
+                old_guild_name, old_guild_prefix, old_tc,
+                new_guild_name, new_guild_prefix, new_tc,
                 acquired_at, war_world=None, participants=[], duration_seconds=None,
             )
             return
@@ -372,8 +377,8 @@ class GuildWarTracker(commands.Cog):
 
         await self._send_notification(
             territory_name,
-            old_guild_name, old_guild_prefix,
-            new_guild_name, new_guild_prefix,
+            old_guild_name, old_guild_prefix, old_tc,
+            new_guild_name, new_guild_prefix, new_tc,
             acquired_at, war_world, participants, duration_seconds,
         )
 
@@ -383,15 +388,17 @@ class GuildWarTracker(commands.Cog):
 
     async def _send_notification(
         self,
-        territory_name:   str,
-        old_guild_name:   str | None,
-        old_guild_prefix: str | None,
-        new_guild_name:   str,
-        new_guild_prefix: str,
-        acquired_at:      datetime,
-        war_world:        str | None,
-        participants:     list[str],
-        duration_seconds: float | None,
+        territory_name:    str,
+        old_guild_name:    str | None,
+        old_guild_prefix:  str | None,
+        old_territory_count: int,
+        new_guild_name:    str,
+        new_guild_prefix:  str,
+        new_territory_count: int,
+        acquired_at:       datetime,
+        war_world:         str | None,
+        participants:      list[str],
+        duration_seconds:  float | None,
     ):
         channel = self.bot.get_channel(NOTIFICATION_CHANNEL_ID)
         if channel is None:
@@ -406,12 +413,12 @@ class GuildWarTracker(commands.Cog):
         )
 
         old_part = (
-            f"{old_guild_name} `[{old_guild_prefix}]`"
+            f"{old_guild_name} `[{old_guild_prefix}]` ({old_territory_count})"
             if old_guild_name else "不明"
         )
         embed.add_field(
             name="所有ギルド",
-            value=f"{old_part} → **{new_guild_name}** `[{new_guild_prefix}]`",
+            value=f"{old_part} → **{new_guild_name}** `[{new_guild_prefix}]` ({new_territory_count})",
             inline=False,
         )
 
