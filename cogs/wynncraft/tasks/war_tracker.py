@@ -231,11 +231,12 @@ class GuildWarTracker(commands.Cog):
                 elif cached['acquired_at'] != new_acquired_at:
                     # acquired_at が更新された ＝ 所有者が変わった
                     captures.append({
-                        'territory_name':  territory_name,
-                        'old_guild_name':  cached['guild_name'],
-                        'new_guild_name':  new_guild_name,
+                        'territory_name':   territory_name,
+                        'old_guild_name':   cached['guild_name'],
+                        'old_guild_prefix': cached['guild_prefix'],
+                        'new_guild_name':   new_guild_name,
                         'new_guild_prefix': new_guild_prefix,
-                        'acquired_at':     new_acquired_at,
+                        'acquired_at':      new_acquired_at,
                     })
                     self.territory_cache[territory_name] = {
                         'guild_name':   new_guild_name,
@@ -268,6 +269,8 @@ class GuildWarTracker(commands.Cog):
 
     async def _process_capture(self, capture: dict):
         territory_name   = capture['territory_name']
+        old_guild_name   = capture['old_guild_name']
+        old_guild_prefix = capture['old_guild_prefix']
         new_guild_name   = capture['new_guild_name']
         new_guild_prefix = capture['new_guild_prefix']
         acquired_at_str  = capture['acquired_at']
@@ -288,8 +291,10 @@ class GuildWarTracker(commands.Cog):
         if not guild_data:
             logger.warning(f"ギルドデータ取得失敗: {new_guild_name!r}")
             await self._send_notification(
-                territory_name, new_guild_name, new_guild_prefix,
-                acquired_at, participants=[], duration_seconds=None,
+                territory_name,
+                old_guild_name, old_guild_prefix,
+                new_guild_name, new_guild_prefix,
+                acquired_at, war_world=None, participants=[], duration_seconds=None,
             )
             return
 
@@ -305,8 +310,10 @@ class GuildWarTracker(commands.Cog):
         if not member_names:
             logger.warning(f"メンバーが見つかりません: {new_guild_name!r}")
             await self._send_notification(
-                territory_name, new_guild_name, new_guild_prefix,
-                acquired_at, participants=[], duration_seconds=None,
+                territory_name,
+                old_guild_name, old_guild_prefix,
+                new_guild_name, new_guild_prefix,
+                acquired_at, war_world=None, participants=[], duration_seconds=None,
             )
             return
 
@@ -328,8 +335,10 @@ class GuildWarTracker(commands.Cog):
         if not world_rs.rows:
             logger.warning(f"ウォーワールドを特定できませんでした: {territory_name!r}")
             await self._send_notification(
-                territory_name, new_guild_name, new_guild_prefix,
-                acquired_at, participants=[], duration_seconds=None,
+                territory_name,
+                old_guild_name, old_guild_prefix,
+                new_guild_name, new_guild_prefix,
+                acquired_at, war_world=None, participants=[], duration_seconds=None,
             )
             return
 
@@ -362,8 +371,10 @@ class GuildWarTracker(commands.Cog):
             logger.exception("Duration の算出中にエラーが発生しました")
 
         await self._send_notification(
-            territory_name, new_guild_name, new_guild_prefix,
-            acquired_at, participants, duration_seconds,
+            territory_name,
+            old_guild_name, old_guild_prefix,
+            new_guild_name, new_guild_prefix,
+            acquired_at, war_world, participants, duration_seconds,
         )
 
     # ------------------------------------------------------------------ #
@@ -373,9 +384,12 @@ class GuildWarTracker(commands.Cog):
     async def _send_notification(
         self,
         territory_name:   str,
-        guild_name:       str,
-        guild_prefix:     str,
+        old_guild_name:   str | None,
+        old_guild_prefix: str | None,
+        new_guild_name:   str,
+        new_guild_prefix: str,
         acquired_at:      datetime,
+        war_world:        str | None,
         participants:     list[str],
         duration_seconds: float | None,
     ):
@@ -385,14 +399,19 @@ class GuildWarTracker(commands.Cog):
             return
 
         embed = discord.Embed(
-            title=f"\U0001f6e1️ Guild War — {territory_name}",
-            color=discord.Color.red(),
+            title=f"⛳️ 領地が取得されました",
+            description=f"**{territory_name}**",
+            color=discord.Color.blue(),
             timestamp=acquired_at,
         )
 
+        old_part = (
+            f"{old_guild_name} `[{old_guild_prefix}]`"
+            if old_guild_name else "不明"
+        )
         embed.add_field(
-            name="新所有ギルド",
-            value=f"**{guild_name}** `[{guild_prefix}]`",
+            name="所有ギルド",
+            value=f"{old_part} → **{new_guild_name}** `[{new_guild_prefix}]`",
             inline=False,
         )
 
@@ -403,30 +422,22 @@ class GuildWarTracker(commands.Cog):
             duration_str = "算出不能"
         embed.add_field(name="推定戦闘時間", value=duration_str, inline=True)
 
+        embed.add_field(
+            name="戦闘ワールド",
+            value=war_world if war_world else "特定できませんでした",
+            inline=True,
+        )
+
         if participants:
-            # Discord フィールドの 1024 文字制限を考慮して分割
-            player_list = '\n'.join(participants)
-            if len(player_list) <= 1024:
-                embed.add_field(
-                    name=f"参加プレイヤー ({len(participants)}名)",
-                    value=player_list,
-                    inline=False,
-                )
-            else:
-                chunks, chunk = [], []
-                chars = 0
-                for name in participants:
-                    if chars + len(name) + 1 > 1024:
-                        embed.add_field(
-                            name=f"参加プレイヤー ({len(participants)}名)",
-                            value='\n'.join(chunk),
-                            inline=False,
-                        )
-                        chunk, chars = [], 0
-                    chunk.append(name)
-                    chars += len(name) + 1
-                if chunk:
-                    embed.add_field(name="​", value='\n'.join(chunk), inline=False)
+            # Guild War は最大 5 人なので 5 人までに制限
+            capped = participants[:5]
+            # アンダーバーを \_  にエスケープして Discord のイタリック化を防ぐ
+            escaped = [p.replace('_', r'\_') for p in capped]
+            embed.add_field(
+                name=f"参加プレイヤー ({len(capped)}名)",
+                value=', '.join(escaped),
+                inline=False,
+            )
         else:
             embed.add_field(name="参加プレイヤー", value="特定できませんでした", inline=False)
 
