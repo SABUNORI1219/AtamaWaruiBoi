@@ -11,7 +11,7 @@ from cogs.wynncraft.libs.api_stocker import WynncraftAPI
 logger = logging.getLogger(__name__)
 
 NOTIFICATION_CHANNEL_ID = 1501198030517567518
-WAR_LOOKBACK_MINUTES    = 30   # move_logs を遡る最大分数
+WAR_LOOKBACK_MINUTES    = 10   # move_logs を遡る最大分数
 CLEANUP_INTERVAL_MIN    = 10   # move_logs クリーンアップ間隔（分）
 
 
@@ -280,11 +280,6 @@ class GuildWarTracker(commands.Cog):
         except Exception:
             logger.exception(f"acquired_at のパース失敗: {acquired_at_str!r}")
             acquired_at = datetime.now(timezone.utc)
-
-        logger.info(
-            f"領地奪取を検知: {territory_name} → {new_guild_name} [{new_guild_prefix}]"
-            f" at {acquired_at_str}"
-        )
 
         # Guild API は「新しく取得したギルド」に対してのみ 1 回実行
         guild_data = await self.api.get_guild_by_name(new_guild_name)
