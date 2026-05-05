@@ -11,7 +11,7 @@ from cogs.wynncraft.libs.api_stocker import WynncraftAPI
 logger = logging.getLogger(__name__)
 
 NOTIFICATION_CHANNEL_ID = 1501198030517567518
-WAR_LOOKBACK_MINUTES    = 30   # move_logs を遡る最大分数
+WAR_LOOKBACK_MINUTES    = 10   # move_logs を遡る最大分数
 CLEANUP_INTERVAL_MIN    = 10   # move_logs クリーンアップ間隔（分）
 
 
