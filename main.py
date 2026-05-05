@@ -21,6 +21,7 @@ EXTENSIONS = [
     "cogs.hsr.tasks.hsr_tasks",
     "cogs.wynncraft.commands.guild_cog",
     "cogs.wynncraft.commands.player_cog",
+    "cogs.wynncraft.tasks.war_tracker",
 ]
 
 

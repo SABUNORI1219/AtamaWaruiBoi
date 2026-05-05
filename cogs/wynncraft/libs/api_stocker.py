@@ -70,6 +70,10 @@ class WynncraftAPI:
         url = f"https://api.wynncraft.com/v3/player/{quote(player_data)}?fullResult"
         return await self._make_request(url)
 
+    async def get_online_players(self):
+        url = "https://api.wynncraft.com/v3/player"
+        return await self._make_request(url)
+
     async def get_territory_list(self):
         url = "https://api.wynncraft.com/v3/guild/list/territory"
         return await self._make_request(url)
